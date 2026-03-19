@@ -377,22 +377,47 @@ export default function BibleBookViewer() {
                       data-verse-key={item.key}
                       className={`flex flex-col gap-0.5 py-0.5 rounded transition-colors mb-1.5 ${highlightedVerseKey === item.key ? 'ring-2 ring-[#1B64F2] bg-blue-50' : ''}`}
                     >
+                      {/* 한국어 모드: 한국어(메인) 먼저, 영어(보조) 나중 | 영어 모드: 영어(메인) 먼저, 한국어(보조) 나중 */}
                       <div className="flex gap-1.5 xs:gap-2 min-390:gap-2">
                         <span className="shrink-0 text-[11px] xs:text-xs text-[#94a3b8] w-6 xs:w-7 min-390:w-8 sm:w-10">
                           {item.verse.verse}
                         </span>
-                        <span className={`text-[13px] xs:text-sm min-390:text-base leading-relaxed text-[#0B1220] ${version === 'en' ? 'font-semibold' : 'font-normal text-[#64748b]'}`}>
-                          {searchQuery.trim()
-                            ? highlightText(item.verse.text, searchQuery)
-                            : item.verse.text}
-                        </span>
-                      </div>
-                      {showExplanation && item.verse.explanation && (
-                        <div className={`ml-6 xs:ml-8 min-390:ml-10 sm:ml-12 pl-1.5 xs:pl-2 border-l-2 border-[#E6EAF2] ${version === 'ko' ? 'font-semibold text-[#0B1220]' : 'font-normal text-[#5B6475]'}`}>
-                          <span className="text-[11px] xs:text-xs text-[#94a3b8] font-medium">{t('explanationLabel')}</span>{' '}
-                          <span className="text-[12px] xs:text-sm">{item.verse.explanation}</span>
+                        <div className="flex-1 min-w-0 flex flex-col gap-0.5">
+                          {version === 'ko' ? (
+                            <>
+                              <span className={`text-[13px] xs:text-sm min-390:text-base leading-relaxed font-semibold text-[#0B1220]`}>
+                                {searchQuery.trim()
+                                  ? highlightText(item.verse.explanation ?? '', searchQuery)
+                                  : item.verse.explanation ?? item.verse.text}
+                              </span>
+                              {showExplanation && item.verse.explanation && item.verse.text && (
+                                <div className="pl-2 border-l-2 border-[#E6EAF2] font-normal text-[#5B6475]">
+                                  <span className="text-[11px] xs:text-xs text-[#94a3b8] font-medium">{t('englishKJVLabel')}</span>{' '}
+                                  <span className="text-[12px] xs:text-sm">
+                                    {searchQuery.trim()
+                                      ? highlightText(item.verse.text, searchQuery)
+                                      : item.verse.text}
+                                  </span>
+                                </div>
+                              )}
+                            </>
+                          ) : (
+                            <>
+                              <span className={`text-[13px] xs:text-sm min-390:text-base leading-relaxed font-semibold text-[#0B1220]`}>
+                                {searchQuery.trim()
+                                  ? highlightText(item.verse.text, searchQuery)
+                                  : item.verse.text}
+                              </span>
+                              {showExplanation && item.verse.explanation && (
+                                <div className="pl-2 border-l-2 border-[#E6EAF2] font-normal text-[#5B6475]">
+                                  <span className="text-[11px] xs:text-xs text-[#94a3b8] font-medium">{t('explanationLabel')}</span>{' '}
+                                  <span className="text-[12px] xs:text-sm">{item.verse.explanation}</span>
+                                </div>
+                              )}
+                            </>
+                          )}
                         </div>
-                      )}
+                      </div>
                     </div>
                   )}
                 </div>

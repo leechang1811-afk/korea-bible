@@ -154,14 +154,30 @@ export default function BibleVersePicker() {
                       transition={{ delay: 0.3 }}
                       className="text-center"
                     >
-                      <p className={`text-[#0B1220] text-[15px] xs:text-base sm:text-xl leading-relaxed break-words px-1 ${bibleVersion === 'en' ? 'font-semibold' : 'font-normal text-[#64748b]'}`}>
-                        {verse.text}
-                      </p>
-                      {verse.explanation && (
-                        <div className={`mt-3 text-left border-l-2 border-[#E6EAF2] pl-3 ${bibleVersion === 'ko' ? 'font-semibold text-[#0B1220]' : 'font-normal text-[#5B6475]'}`}>
-                          <span className="text-[#94a3b8] text-xs font-medium">{t('explanationLabel')}</span>
-                          <p className={`text-sm mt-1 leading-relaxed ${bibleVersion === 'ko' ? 'text-[#0B1220]' : ''}`}>{verse.explanation}</p>
-                        </div>
+                      {bibleVersion === 'ko' ? (
+                        <>
+                          <p className="text-[#0B1220] text-[15px] xs:text-base sm:text-xl leading-relaxed break-words px-1 font-semibold">
+                            {verse.explanation ?? verse.text}
+                          </p>
+                          {verse.text && (
+                            <div className="mt-3 text-left border-l-2 border-[#E6EAF2] pl-3 font-normal text-[#5B6475]">
+                              <span className="text-[#94a3b8] text-xs font-medium">{t('englishKJVLabel')}</span>
+                              <p className="text-sm mt-1 leading-relaxed">{verse.text}</p>
+                            </div>
+                          )}
+                        </>
+                      ) : (
+                        <>
+                          <p className="text-[#0B1220] text-[15px] xs:text-base sm:text-xl leading-relaxed break-words px-1 font-semibold">
+                            {verse.text}
+                          </p>
+                          {verse.explanation && (
+                            <div className="mt-3 text-left border-l-2 border-[#E6EAF2] pl-3 font-normal text-[#5B6475]">
+                              <span className="text-[#94a3b8] text-xs font-medium">{t('explanationLabel')}</span>
+                              <p className="text-sm mt-1 leading-relaxed">{verse.explanation}</p>
+                            </div>
+                          )}
+                        </>
                       )}
                       <p className="text-[#1B64F2] text-base mt-4 font-semibold">
                         {verse.bookName} {verse.chapter}:{verse.verse}
