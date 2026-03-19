@@ -43,11 +43,13 @@ export const useBibleStore = create<{
   customOrder: string[] | null;
   currentDayIndex: number;
   bibleVersion: BibleVersion;
+  showExplanation: boolean;
   bookmarks: BibleBookmark[];
   memos: BibleMemo[];
   dailyVerses: BibleDailyVerse[];
   setStartBook: (bookId: string) => void;
   setBibleVersion: (v: BibleVersion) => void;
+  setShowExplanation: (v: boolean) => void;
   setCustomOrder: (order: string[] | null) => void;
   setCurrentDay: (day: number) => void;
   addBookmark: (item: ReadingItem, date: string) => void;
@@ -69,12 +71,14 @@ export const useBibleStore = create<{
       customOrder: null,
       currentDayIndex: 1,
       bibleVersion: 'ko',
+      showExplanation: true,
       bookmarks: [],
       memos: [],
       dailyVerses: [],
       setStartBook: (bookId) => set({ startBookId: bookId }),
       setCustomOrder: (order) => set({ customOrder: order }),
       setBibleVersion: (v) => set({ bibleVersion: v }),
+      setShowExplanation: (v) => set({ showExplanation: v }),
       setCurrentDay: (day) => set({ currentDayIndex: Math.max(1, day) }),
       addBookmark: (item, date) => {
         const { bookmarks } = get();

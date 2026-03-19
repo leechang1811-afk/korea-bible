@@ -20,7 +20,7 @@ export default function BibleSettings() {
   return (
     <div className="min-h-screen min-h-[100dvh] bg-[#f8fafc] pb-24 overflow-x-hidden w-full max-w-full">
       <header className="sticky top-0 z-10 bg-white border-b border-[#E6EAF2] shadow-sm pt-[max(0.5rem,env(safe-area-inset-top))]">
-        <div className="flex items-center justify-between px-3 xs:px-4 py-2.5 xs:py-3">
+        <div className="flex items-center justify-between px-2 xs:px-3 min-375:px-4 min-390:px-5 py-2.5 xs:py-3 min-390:py-3.5">
           <button
             onClick={() => navigate('/')}
             className="text-[#5B6475] text-sm font-medium"
@@ -32,7 +32,7 @@ export default function BibleSettings() {
         </div>
       </header>
 
-      <div className="p-3 xs:p-4 sm:p-6 max-w-2xl mx-auto w-full box-border">
+      <div className="p-2 xs:p-3 min-375:p-4 min-390:p-5 sm:p-6 max-w-2xl mx-auto w-full box-border">
         <div className="mb-4 xs:mb-6">
           <p className="text-[#5B6475] text-xs xs:text-sm mb-2 font-medium">{t('bibleVersionLabel')}</p>
           <div className="flex rounded-lg xs:rounded-xl overflow-hidden border border-[#E6EAF2] bg-white">

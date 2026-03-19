@@ -3,7 +3,11 @@ export default {
   content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
   theme: {
     screens: {
-      xs: '360px',
+      /* 핸드폰 화면별 최적화 */
+      xs: '360px',      // 소형 안드로이드
+      'min-375': '375px',  // iPhone SE, iPhone 6/7/8
+      'min-390': '390px',  // iPhone 12/13/14
+      'min-428': '428px',  // iPhone 14 Pro Max, 대형 폰
       sm: '640px',
       md: '768px',
       lg: '1024px',

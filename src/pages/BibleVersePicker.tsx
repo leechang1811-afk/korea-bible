@@ -73,7 +73,7 @@ export default function BibleVersePicker() {
 
   return (
     <div className="min-h-screen min-h-[100dvh] flex flex-col bg-white overflow-x-hidden w-full max-w-full">
-      <header className="flex items-center justify-between px-3 xs:px-4 py-2.5 xs:py-3 pt-[max(0.75rem,env(safe-area-inset-top))] border-b border-[#E6EAF2]">
+      <header className="flex items-center justify-between px-2 xs:px-3 min-375:px-4 min-390:px-5 py-2.5 xs:py-3 min-390:py-3.5 pt-[max(0.75rem,env(safe-area-inset-top))] border-b border-[#E6EAF2]">
         <button
           onClick={() => navigate('/')}
           className="text-[#5B6475] text-sm font-medium hover:text-[#1B64F2]"

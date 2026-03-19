@@ -21,21 +21,23 @@ export default function BibleHome() {
         </div>
       </header>
 
-      <div className="flex-1 flex flex-col items-center justify-center px-3 xs:px-4 sm:px-6 py-4 xs:py-5 sm:py-8 pb-[max(1rem,env(safe-area-inset-bottom))] overflow-x-hidden w-full box-border">
-        <div className="w-full max-w-md rounded-2xl xs:rounded-3xl p-4 xs:p-6 sm:p-8 pb-8 xs:pb-10 sm:pb-12 bg-[#EEF4FF] border border-[#E6EAF2] mx-3 xs:mx-4">
-          <div className="flex flex-col items-center pb-4 xs:pb-6">
-            <div className="flex gap-2 mb-2">
+      <div className="flex-1 flex flex-col items-center justify-center px-2 xs:px-3 min-375:px-4 sm:px-6 py-3 xs:py-4 min-390:py-5 sm:py-8 pb-[max(1rem,env(safe-area-inset-bottom))] overflow-x-hidden w-full box-border">
+        <div className="w-full max-w-md rounded-xl xs:rounded-2xl min-390:rounded-3xl p-3 xs:p-5 min-390:p-6 sm:p-8 pb-6 xs:pb-8 min-390:pb-10 sm:pb-12 bg-[#EEF4FF] border border-[#E6EAF2] mx-2 xs:mx-3 min-375:mx-4">
+          <div className="flex flex-col items-center pb-3 xs:pb-5 min-390:pb-6">
+            <div className="flex gap-1.5 xs:gap-2 mb-2 min-390:mb-2">
               <button
                 onClick={() => setBibleVersion('ko')}
-                className={`px-3 py-1 rounded-lg text-xs font-medium ${bibleVersion === 'ko' ? 'bg-[#1B64F2] text-white' : 'bg-white/80 text-[#5B6475]'}`}
+                className={`min-h-[44px] px-2 xs:px-2.5 min-390:px-3 py-1 rounded-lg text-[11px] xs:text-xs font-medium ${bibleVersion === 'ko' ? 'bg-[#1B64F2] text-white' : 'bg-white/80 text-[#5B6475]'}`}
               >
-                한국어
+                <span className="xs:hidden">한</span>
+                <span className="hidden xs:inline">한국어</span>
               </button>
               <button
                 onClick={() => setBibleVersion('en')}
-                className={`px-3 py-1 rounded-lg text-xs font-medium ${bibleVersion === 'en' ? 'bg-[#1B64F2] text-white' : 'bg-white/80 text-[#5B6475]'}`}
+                className={`min-h-[44px] px-2 xs:px-2.5 min-390:px-3 py-1 rounded-lg text-[11px] xs:text-xs font-medium ${bibleVersion === 'en' ? 'bg-[#1B64F2] text-white' : 'bg-white/80 text-[#5B6475]'}`}
               >
-                English
+                <span className="xs:hidden">EN</span>
+                <span className="hidden xs:inline">English</span>
               </button>
             </div>
             <div className="relative w-10 h-12 mb-4" aria-hidden>

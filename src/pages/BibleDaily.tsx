@@ -199,7 +199,7 @@ export default function BibleDaily() {
     <div className="min-h-screen min-h-[100dvh] bg-[#f8fafc] pb-24 xs:pb-28 overflow-x-hidden w-full max-w-full">
       {/* 상단 헤더 */}
       <header className="sticky top-0 z-10 bg-white border-b border-[#E6EAF2] shadow-sm pt-[max(0.5rem,env(safe-area-inset-top))]">
-        <div className="flex items-center justify-between px-3 xs:px-4 py-2.5 xs:py-3">
+        <div className="flex items-center justify-between px-2 xs:px-3 min-375:px-4 min-390:px-5 py-2.5 xs:py-3 min-390:py-3.5">
           <button
             onClick={() => navigate('/')}
             className="text-[#5B6475] text-sm font-medium"
@@ -218,7 +218,7 @@ export default function BibleDaily() {
         </div>
       </header>
 
-      <div className="p-3 xs:p-4 sm:p-6 max-w-2xl mx-auto w-full box-border">
+      <div className="p-2 xs:p-3 min-375:p-4 min-390:p-5 sm:p-6 max-w-2xl mx-auto w-full box-border">
         {/* Day selector */}
         <div className="flex items-center gap-2 xs:gap-3 mb-4 xs:mb-6">
           <button
@@ -247,31 +247,35 @@ export default function BibleDaily() {
           className="bg-white rounded-xl xs:rounded-2xl shadow-sm border border-[#E6EAF2] overflow-hidden"
         >
           <div className="p-4 xs:p-5 sm:p-6">
-            {/* 1행: 한국어 / 영어 번역 */}
-            <div className="mb-4">
+            {/* 1행: 한국어 / 영어 번역 - 모바일은 한/EN, sm 이상은 전체 표시 */}
+            <div className="mb-3 xs:mb-4">
               <div className="flex rounded-lg overflow-hidden border border-[#E6EAF2] w-fit">
                 <button
                   onClick={() => setBibleVersion('ko')}
-                  className={`min-h-[36px] px-3 py-1.5 text-xs font-medium ${bibleVersion === 'ko' ? 'bg-[#1B64F2] text-white' : 'bg-white text-[#5B6475] hover:bg-[#f1f5f9]'}`}
+                  className={`min-h-[44px] min-w-[44px] px-2 xs:px-2.5 min-390:px-3 py-1.5 text-[11px] xs:text-xs font-medium touch-target ${bibleVersion === 'ko' ? 'bg-[#1B64F2] text-white' : 'bg-white text-[#5B6475] hover:bg-[#f1f5f9] active:bg-[#E6EAF2]'}`}
+                  title={t('korean')}
                 >
-                  {t('korean')}
+                  <span className="sm:hidden">한</span>
+                  <span className="hidden sm:inline">{t('korean')}</span>
                 </button>
                 <button
                   onClick={() => setBibleVersion('en')}
-                  className={`min-h-[36px] px-3 py-1.5 text-xs font-medium ${bibleVersion === 'en' ? 'bg-[#1B64F2] text-white' : 'bg-white text-[#5B6475] hover:bg-[#f1f5f9]'}`}
+                  className={`min-h-[44px] min-w-[44px] px-2 xs:px-2.5 min-390:px-3 py-1.5 text-[11px] xs:text-xs font-medium touch-target ${bibleVersion === 'en' ? 'bg-[#1B64F2] text-white' : 'bg-white text-[#5B6475] hover:bg-[#f1f5f9] active:bg-[#E6EAF2]'}`}
+                  title={t('english')}
                 >
-                  {t('english')}
+                  <span className="sm:hidden">EN</span>
+                  <span className="hidden sm:inline">{t('english')}</span>
                 </button>
               </div>
             </div>
 
             {/* 2행: 음향 버튼들 + 찜하기 */}
-            <div className="flex flex-wrap items-center gap-2 mb-8">
-              <div className="flex items-center gap-1.5 flex-wrap">
+            <div className="flex flex-wrap items-center gap-1.5 xs:gap-2 mb-6 min-390:mb-8">
+              <div className="flex items-center gap-1 xs:gap-1.5 flex-wrap">
                 <button
                   onClick={handleListen}
                   disabled={ttsPlaying}
-                  className={`px-2.5 py-1.5 rounded-lg text-xs font-medium min-h-[36px] flex items-center gap-1 ${
+                  className={`px-2 xs:px-2.5 min-390:px-3 py-1.5 rounded-lg text-[11px] xs:text-xs font-medium min-h-[44px] min-w-[44px] flex items-center gap-1 touch-target ${
                     !ttsPlaying ? 'bg-[#1B64F2] text-white' : 'bg-[#E6EAF2] text-[#94a3b8]'
                   }`}
                   title={t('listen')}
@@ -281,7 +285,7 @@ export default function BibleDaily() {
                 <button
                   onClick={handleStop}
                   disabled={!ttsPlaying}
-                  className={`px-2.5 py-1.5 rounded-lg text-xs font-medium min-h-[36px] flex items-center gap-1 ${
+                  className={`px-2 xs:px-2.5 min-390:px-3 py-1.5 rounded-lg text-[11px] xs:text-xs font-medium min-h-[44px] min-w-[44px] flex items-center gap-1 touch-target ${
                     ttsPlaying ? 'bg-[#dc2626] text-white' : 'bg-[#E6EAF2] text-[#94a3b8]'
                   }`}
                   title={t('stopTTS')}
@@ -290,7 +294,7 @@ export default function BibleDaily() {
                 </button>
                 <button
                   onClick={handleReplayFromStart}
-                  className="px-2.5 py-1.5 rounded-lg text-xs font-medium min-h-[36px] flex items-center gap-1 bg-[#EEF4FF] text-[#1B64F2] hover:bg-[#1B64F2]/10"
+                  className="px-2 xs:px-2.5 min-390:px-3 py-1.5 rounded-lg text-[11px] xs:text-xs font-medium min-h-[44px] min-w-[44px] flex items-center gap-1 bg-[#EEF4FF] text-[#1B64F2] hover:bg-[#1B64F2]/10 touch-target"
                   title={t('replayFromStart')}
                 >
                   🔄 {t('replayFromStartShort')}
@@ -298,7 +302,7 @@ export default function BibleDaily() {
               </div>
               <button
                 onClick={handleBookmark}
-                className={`p-2 rounded-lg min-h-[40px] min-w-[40px] flex items-center justify-center ${bookmarked ? 'text-red-500 bg-red-50' : 'bg-[#EEF4FF] text-[#5B6475]'} hover:opacity-80`}
+                className={`p-2 rounded-lg min-h-[44px] min-w-[44px] flex items-center justify-center touch-target ${bookmarked ? 'text-red-500 bg-red-50' : 'bg-[#EEF4FF] text-[#5B6475]'} hover:opacity-80 active:opacity-70`}
                 title={bookmarked ? t('unbookmark') : t('bookmark')}
               >
                 {bookmarked ? '❤️' : '🤍'}
