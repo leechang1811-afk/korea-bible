@@ -140,11 +140,19 @@ export default function BibleDaily() {
     setTtsPlaying(true);
     setTtsStoppedAtIndex(null);
     if (verses.length > 0) {
-      const verseTexts = verses.map((v) => `Chapter ${v.chapter}, verse ${v.verse}. ${v.text}`);
+      const isKo = bibleVersion === 'ko';
+      const verseTexts = verses.map((v) => {
+        if (isKo) {
+          const numPart = `${toSinoKorean(v.chapter)}장 ${toSinoKorean(v.verse)}절`;
+          const koreanText = v.explanation?.trim();
+          return koreanText ? `${numPart}. ${koreanText}` : numPart;
+        }
+        return `Chapter ${v.chapter}, verse ${v.verse}. ${v.text}`;
+      });
       speakVerses(
         verseTexts,
         1000,
-        'en-US',
+        isKo ? 'ko-KR' : 'en-US',
         onEnd,
         fromIndex,
         (i) => { ttsCurrentVerseRef.current = i; }
