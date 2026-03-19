@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useVirtualizer } from '@tanstack/react-virtual';
 import { useBibleStore } from '../store/bibleStore';
 import { useTranslation } from '../hooks/useTranslation';
 import { loadBible, loadExplanations, getBookName, getVerseKey, type BibleVersion } from '../services/bibleText';
@@ -35,6 +36,7 @@ export default function BibleBookViewer() {
   const [searchResults, setSearchResults] = useState<string[]>([]);
   const [currentMatchIndex, setCurrentMatchIndex] = useState(0);
   const [searchFocused, setSearchFocused] = useState(false);
+  const [highlightedVerseKey, setHighlightedVerseKey] = useState<string | null>(null);
 
   const version: BibleVersion = bibleVersion;
 
@@ -69,6 +71,59 @@ export default function BibleBookViewer() {
     return out;
   }, [data, explanations]);
 
+  type FlatItem =
+    | { type: 'book'; bookId: string; height: number }
+    | { type: 'chapter'; bookId: string; chNum: number; height: number }
+    | { type: 'verse'; bookId: string; chNum: number; verse: VerseEntry; key: string; height: number };
+
+  const { flatItems, verseKeyToIndex, bookIdToIndex } = useMemo(() => {
+    const items: FlatItem[] = [];
+    const verseMap = new Map<string, number>();
+    const bookMap = new Map<string, number>();
+    const q = searchQuery.trim().toLowerCase();
+    const isSearch = q.length > 0;
+
+    for (const book of BIBLE_BOOKS_ORDER) {
+      const bookVerses = verses.filter((v) => v.bookId === book.id);
+      if (bookVerses.length === 0) continue;
+
+      const chapters = new Map<number, VerseEntry[]>();
+      for (const v of bookVerses) {
+        const arr = chapters.get(v.chapter) ?? [];
+        arr.push(v);
+        chapters.set(v.chapter, arr);
+      }
+      const chEntries = [...chapters.entries()].sort((a, b) => a[0] - b[0]);
+
+      if (!isSearch) {
+        bookMap.set(book.id, items.length);
+        items.push({ type: 'book', bookId: book.id, height: 56 });
+      }
+
+      for (const [chNum, chVerses] of chEntries) {
+        const visibleVerses = isSearch ? chVerses.filter((v) => v.text.toLowerCase().includes(q)) : chVerses;
+        if (visibleVerses.length === 0) continue;
+
+        if (isSearch && !bookMap.has(book.id)) bookMap.set(book.id, items.length);
+        items.push({ type: 'chapter', bookId: book.id, chNum, height: 36 });
+        for (const v of visibleVerses) {
+          const key = getVerseKey(v.bookId, v.chapter, v.verse);
+          const h = showExplanation && v.explanation ? 78 : 52;
+          verseMap.set(key, items.length);
+          items.push({ type: 'verse', bookId: book.id, chNum, verse: v, key, height: h });
+        }
+      }
+    }
+    return { flatItems: items, verseKeyToIndex: verseMap, bookIdToIndex: bookMap };
+  }, [verses, searchQuery, showExplanation]);
+
+  const rowVirtualizer = useVirtualizer({
+    count: flatItems.length,
+    getScrollElement: () => scrollRef.current,
+    estimateSize: (i) => flatItems[i]?.height ?? 52,
+    overscan: 12,
+  });
+
   const runSearch = useCallback(() => {
     if (!searchQuery.trim() || !data) {
       setSearchResults([]);
@@ -99,15 +154,13 @@ export default function BibleBookViewer() {
   }, [runSearch]);
 
   const scrollToVerse = useCallback((key: string) => {
-    const el = verseRefs.current.get(key);
-    if (el) {
-      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      el.classList.add('ring-2', 'ring-[#1B64F2]', 'bg-blue-50');
-      setTimeout(() => {
-        el.classList.remove('ring-2', 'ring-[#1B64F2]', 'bg-blue-50');
-      }, 1500);
+    const idx = verseKeyToIndex.get(key);
+    if (idx !== undefined) {
+      setHighlightedVerseKey(key);
+      setTimeout(() => setHighlightedVerseKey(''), 1500);
+      rowVirtualizer.scrollToIndex(idx, { align: 'center', behavior: 'smooth' });
     }
-  }, []);
+  }, [verseKeyToIndex, rowVirtualizer]);
 
   const goPrev = () => {
     if (searchResults.length === 0) return;
@@ -124,18 +177,21 @@ export default function BibleBookViewer() {
   };
 
   const scrollToBook = useCallback((bookId: string) => {
-    const el = bookSectionRefs.current.get(bookId);
-    if (el) {
-      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    const idx = bookIdToIndex.get(bookId);
+    if (idx !== undefined) {
+      rowVirtualizer.scrollToIndex(idx, { align: 'start', behavior: 'smooth' });
     }
-  }, []);
+  }, [bookIdToIndex, rowVirtualizer]);
 
   useEffect(() => {
     const book = searchParams.get('book');
-    if (book && data) {
-      setTimeout(() => scrollToBook(book), 500);
+    if (book && data && flatItems.length > 0) {
+      const idx = bookIdToIndex.get(book);
+      if (idx != null) {
+        setTimeout(() => rowVirtualizer.scrollToIndex(idx, { align: 'start', behavior: 'smooth' }), 100);
+      }
     }
-  }, [searchParams.get('book'), data]);
+  }, [searchParams.get('book'), data, flatItems.length, bookIdToIndex, rowVirtualizer]);
 
   const highlightText = (text: string, query: string): React.ReactNode => {
     if (!query.trim()) return text;
@@ -280,68 +336,66 @@ export default function BibleBookViewer() {
         </aside>
 
         <main ref={scrollRef} className="flex-1 overflow-y-auto px-2 xs:px-3 min-375:px-4 min-428:px-5 sm:px-6 py-3 xs:py-4 min-390:py-5 sm:py-6 pb-[max(1.5rem,env(safe-area-inset-bottom))] min-390:pb-[max(2rem,env(safe-area-inset-bottom))]">
-          <div className="max-w-2xl mx-auto space-y-6">
-            {BIBLE_BOOKS_ORDER.map((book) => {
-              const bookVerses = verses.filter((v) => v.bookId === book.id);
-              if (bookVerses.length === 0) return null;
-              const chapters = new Map<number, VerseEntry[]>();
-              for (const v of bookVerses) {
-                const arr = chapters.get(v.chapter) ?? [];
-                arr.push(v);
-                chapters.set(v.chapter, arr);
-              }
+          <div
+            className="max-w-2xl mx-auto"
+            style={{
+              height: `${rowVirtualizer.getTotalSize() + 24}px`,
+              position: 'relative',
+              width: '100%',
+              paddingTop: 12,
+              paddingBottom: 12,
+            }}
+          >
+            {rowVirtualizer.getVirtualItems().map((virtualRow) => {
+              const item = flatItems[virtualRow.index];
+              if (!item) return null;
               return (
-                <section
-                  key={book.id}
-                  id={`book-${book.id}`}
-                  ref={(el) => { if (el) bookSectionRefs.current.set(book.id, el); }}
-                  className="scroll-mt-20 [content-visibility:auto]"
+                <div
+                  key={virtualRow.key}
+                  data-index={virtualRow.index}
+                  ref={rowVirtualizer.measureElement}
+                  className="absolute left-0 w-full px-0"
+                  style={{ transform: `translateY(${virtualRow.start}px)` }}
                 >
-                  <h2 className="text-base xs:text-lg min-390:text-xl sm:text-2xl font-bold text-[#1B64F2] mb-3 xs:mb-4 pb-2 border-b border-[#E6EAF2]">
-                    {getBookName(book.id, version)}
-                  </h2>
-                  {[...chapters.entries()]
-                    .sort((a, b) => a[0] - b[0])
-                    .map(([chNum, chVerses]) => (
-                      <div key={`${book.id}-${chNum}`} className="mb-6">
-                        <h3 className="text-xs xs:text-sm font-semibold text-[#5B6475] mb-1.5 xs:mb-2">{chNum}{t('bibleChapter')}</h3>
-                        <div className="space-y-1.5">
-                          {chVerses.map((v) => {
-                            const key = getVerseKey(v.bookId, v.chapter, v.verse);
-                            const show = !searchQuery.trim() || v.text.toLowerCase().includes(searchQuery.trim().toLowerCase());
-                            if (!show) return null;
-                            return (
-                              <div
-                                key={key}
-                                ref={(el) => {
-                                  if (el) verseRefs.current.set(key, el);
-                                }}
-                                data-verse-key={key}
-                                className="flex flex-col gap-0.5 py-0.5 rounded transition-colors"
-                              >
-                                <div className="flex gap-1.5 xs:gap-2 min-390:gap-2">
-                                  <span className="shrink-0 text-[11px] xs:text-xs text-[#94a3b8] w-6 xs:w-7 min-390:w-8 sm:w-10">
-                                    {v.verse}
-                                  </span>
-                                  <span className={`text-[13px] xs:text-sm min-390:text-base leading-relaxed text-[#0B1220] ${version === 'en' ? 'font-semibold' : 'font-normal text-[#64748b]'}`}>
-                                    {searchQuery.trim()
-                                      ? highlightText(v.text, searchQuery)
-                                      : v.text}
-                                  </span>
-                                </div>
-                                {showExplanation && v.explanation && (
-                                  <div className={`ml-6 xs:ml-8 min-390:ml-10 sm:ml-12 pl-1.5 xs:pl-2 border-l-2 border-[#E6EAF2] ${version === 'ko' ? 'font-semibold text-[#0B1220]' : 'font-normal text-[#5B6475]'}`}>
-                                    <span className="text-[11px] xs:text-xs text-[#94a3b8] font-medium">{t('explanationLabel')}</span>{' '}
-                                    <span className="text-[12px] xs:text-sm">{v.explanation}</span>
-                                  </div>
-                                )}
-                              </div>
-                            );
-                          })}
-                        </div>
+                  {item.type === 'book' && (
+                    <h2
+                      id={`book-${item.bookId}`}
+                      ref={(el) => { if (el) bookSectionRefs.current.set(item.bookId, el); }}
+                      className="scroll-mt-20 text-base xs:text-lg min-390:text-xl sm:text-2xl font-bold text-[#1B64F2] mb-3 xs:mb-4 pb-2 border-b border-[#E6EAF2]"
+                    >
+                      {getBookName(item.bookId, version)}
+                    </h2>
+                  )}
+                  {item.type === 'chapter' && (
+                    <h3 className="text-xs xs:text-sm font-semibold text-[#5B6475] mb-1.5 xs:mb-2">
+                      {item.chNum}{t('bibleChapter')}
+                    </h3>
+                  )}
+                  {item.type === 'verse' && (
+                    <div
+                      ref={(el) => { if (el) verseRefs.current.set(item.key, el); }}
+                      data-verse-key={item.key}
+                      className={`flex flex-col gap-0.5 py-0.5 rounded transition-colors mb-1.5 ${highlightedVerseKey === item.key ? 'ring-2 ring-[#1B64F2] bg-blue-50' : ''}`}
+                    >
+                      <div className="flex gap-1.5 xs:gap-2 min-390:gap-2">
+                        <span className="shrink-0 text-[11px] xs:text-xs text-[#94a3b8] w-6 xs:w-7 min-390:w-8 sm:w-10">
+                          {item.verse.verse}
+                        </span>
+                        <span className={`text-[13px] xs:text-sm min-390:text-base leading-relaxed text-[#0B1220] ${version === 'en' ? 'font-semibold' : 'font-normal text-[#64748b]'}`}>
+                          {searchQuery.trim()
+                            ? highlightText(item.verse.text, searchQuery)
+                            : item.verse.text}
+                        </span>
                       </div>
-                    ))}
-                </section>
+                      {showExplanation && item.verse.explanation && (
+                        <div className={`ml-6 xs:ml-8 min-390:ml-10 sm:ml-12 pl-1.5 xs:pl-2 border-l-2 border-[#E6EAF2] ${version === 'ko' ? 'font-semibold text-[#0B1220]' : 'font-normal text-[#5B6475]'}`}>
+                          <span className="text-[11px] xs:text-xs text-[#94a3b8] font-medium">{t('explanationLabel')}</span>{' '}
+                          <span className="text-[12px] xs:text-sm">{item.verse.explanation}</span>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
               );
             })}
           </div>
