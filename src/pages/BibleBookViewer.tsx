@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useBibleStore } from '../store/bibleStore';
 import { useTranslation } from '../hooks/useTranslation';
@@ -23,6 +23,7 @@ export default function BibleBookViewer() {
   const [searchParams] = useSearchParams();
   const scrollRef = useRef<HTMLDivElement>(null);
   const verseRefs = useRef<Map<string, HTMLDivElement>>(new Map());
+  const bookSectionRefs = useRef<Map<string, HTMLElement>>(new Map());
 
   const { t } = useTranslation();
   const { bibleVersion } = useBibleStore();
@@ -45,8 +46,9 @@ export default function BibleBookViewer() {
     });
   }, [version]);
 
-  const verses: VerseEntry[] = [];
-  if (data) {
+  const verses = useMemo<VerseEntry[]>(() => {
+    const out: VerseEntry[] = [];
+    if (!data) return out;
     for (const book of BIBLE_BOOKS_ORDER) {
       const chapters = CHAPTER_COUNTS[book.id] ?? 0;
       for (let ch = 1; ch <= chapters; ch++) {
@@ -54,7 +56,7 @@ export default function BibleBookViewer() {
           const key = getVerseKey(book.id, ch, v);
           const raw = data[key];
           if (!raw) break;
-          verses.push({
+          out.push({
             bookId: book.id,
             chapter: ch,
             verse: v,
@@ -64,7 +66,8 @@ export default function BibleBookViewer() {
         }
       }
     }
-  }
+    return out;
+  }, [data, explanations]);
 
   const runSearch = useCallback(() => {
     if (!searchQuery.trim() || !data) {
@@ -120,13 +123,12 @@ export default function BibleBookViewer() {
     scrollToVerse(searchResults[idx]!);
   };
 
-  const scrollToBook = (bookId: string) => {
-    const chapters = CHAPTER_COUNTS[bookId] ?? 0;
-    if (chapters > 0) {
-      const key = getVerseKey(bookId, 1, 1);
-      scrollToVerse(key);
+  const scrollToBook = useCallback((bookId: string) => {
+    const el = bookSectionRefs.current.get(bookId);
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
-  };
+  }, []);
 
   useEffect(() => {
     const book = searchParams.get('book');
@@ -210,6 +212,18 @@ export default function BibleBookViewer() {
               </div>
             )}
           </div>
+          {/* 검색창 아래 목차 - 전서 클릭 시 해당 책으로 스크롤 */}
+          <div className="overflow-x-auto overflow-y-hidden -mx-3 px-3 flex gap-1.5 py-2 scrollbar-hide" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+            {BIBLE_BOOKS_ORDER.map((book) => (
+              <button
+                key={book.id}
+                onClick={() => scrollToBook(book.id)}
+                className="shrink-0 px-2.5 py-1.5 rounded-lg text-xs font-medium text-[#5B6475] bg-[#F1F5F9] hover:bg-[#EEF4FF] hover:text-[#1B64F2] active:bg-[#E6EAF2] whitespace-nowrap"
+              >
+                {getBookName(book.id, version)}
+              </button>
+            ))}
+          </div>
         </div>
       </header>
 
@@ -250,7 +264,12 @@ export default function BibleBookViewer() {
                 chapters.set(v.chapter, arr);
               }
               return (
-                <section key={book.id} id={`book-${book.id}`} className="scroll-mt-20">
+                <section
+                  key={book.id}
+                  id={`book-${book.id}`}
+                  ref={(el) => { if (el) bookSectionRefs.current.set(book.id, el); }}
+                  className="scroll-mt-20 [content-visibility:auto]"
+                >
                   <h2 className="text-xl sm:text-2xl font-bold text-[#1B64F2] mb-4 pb-2 border-b border-[#E6EAF2]">
                     {getBookName(book.id, version)}
                   </h2>
