@@ -332,7 +332,7 @@ function JournalCard({
         className="w-full min-h-[48px] text-left px-4 xs:px-6 py-3 xs:py-4 flex items-center justify-between gap-2"
       >
         <div className="flex items-center gap-2 min-w-0 flex-1">
-          {isBk && <span className="text-red-500 flex-shrink-0">❤️</span>}
+          {isBk && <span className="text-pink-500 flex-shrink-0" aria-hidden>♥</span>}
           <span className="font-semibold text-[#0B1220] text-sm xs:text-base truncate">{item.readingRef}</span>
         </div>
         <span className="text-[#94a3b8]">{expanded ? '▲' : '▼'}</span>

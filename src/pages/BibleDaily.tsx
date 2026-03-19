@@ -310,10 +310,10 @@ export default function BibleDaily() {
               </div>
               <button
                 onClick={handleBookmark}
-                className={`p-2 rounded-lg min-h-[44px] min-w-[44px] flex items-center justify-center touch-target ${bookmarked ? 'text-red-500 bg-red-50' : 'bg-[#EEF4FF] text-[#5B6475]'} hover:opacity-80 active:opacity-70`}
+                className={`p-2 rounded-lg min-h-[44px] min-w-[44px] flex items-center justify-center touch-target text-xl ${bookmarked ? 'text-pink-500 bg-pink-50' : 'bg-[#EEF4FF] text-[#94a3b8]'} hover:opacity-80 active:opacity-70`}
                 title={bookmarked ? t('unbookmark') : t('bookmark')}
               >
-                {bookmarked ? '❤️' : '🤍'}
+                {bookmarked ? '♥' : '♡'}
               </button>
             </div>
 
