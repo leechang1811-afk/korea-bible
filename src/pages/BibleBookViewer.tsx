@@ -277,16 +277,16 @@ export default function BibleBookViewer() {
                                   <span className="shrink-0 text-xs text-[#94a3b8] w-8 sm:w-10">
                                     {v.verse}
                                   </span>
-                                  <span className="text-sm sm:text-base leading-relaxed text-[#0B1220]">
+                                  <span className={`text-sm sm:text-base leading-relaxed text-[#0B1220] ${version === 'en' ? 'font-semibold' : 'font-normal text-[#64748b]'}`}>
                                     {searchQuery.trim()
                                       ? highlightText(v.text, searchQuery)
                                       : v.text}
                                   </span>
                                 </div>
                                 {v.explanation && (
-                                  <div className="ml-10 sm:ml-12 pl-2 border-l-2 border-[#E6EAF2]">
+                                  <div className={`ml-10 sm:ml-12 pl-2 border-l-2 border-[#E6EAF2] ${version === 'ko' ? 'font-semibold text-[#0B1220]' : 'font-normal text-[#5B6475]'}`}>
                                     <span className="text-xs text-[#94a3b8] font-medium">{t('explanationLabel')}</span>{' '}
-                                    <span className="text-sm text-[#5B6475]">{v.explanation}</span>
+                                    <span className="text-sm">{v.explanation}</span>
                                   </div>
                                 )}
                               </div>

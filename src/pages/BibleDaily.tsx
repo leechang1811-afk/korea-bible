@@ -330,10 +330,12 @@ export default function BibleDaily() {
                         <span className="text-[#1B64F2] font-medium text-sm">
                           {v.chapter}:{v.verse}{' '}
                         </span>
-                        {v.text}
+                        <span className={bibleVersion === 'en' ? 'font-semibold' : 'font-normal text-[#64748b]'}>
+                          {v.text}
+                        </span>
                       </p>
                       {v.explanation && (
-                        <p className="text-[#5B6475] text-sm pl-1 border-l-2 border-[#E6EAF2] ml-1">
+                        <p className={`text-sm pl-1 border-l-2 border-[#E6EAF2] ml-1 ${bibleVersion === 'ko' ? 'font-semibold text-[#0B1220]' : 'font-normal text-[#5B6475]'}`}>
                           <span className="text-[#94a3b8] text-xs font-medium">{t('explanationLabel')}</span> {v.explanation}
                         </p>
                       )}
