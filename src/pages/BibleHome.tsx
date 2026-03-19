@@ -11,7 +11,14 @@ export default function BibleHome() {
   return (
     <div className="min-h-screen min-h-[100dvh] flex flex-col bg-white overflow-x-hidden w-full max-w-full">
       <header className="pt-[max(0.75rem,env(safe-area-inset-top))] border-b border-[#E6EAF2] w-full">
-        <AuthBanner />
+        <div className="flex items-start justify-between gap-2 min-w-0">
+          <div className="flex-1 min-w-0">
+            <AuthBanner />
+          </div>
+          <p className="text-[#94a3b8] text-[10px] xs:text-xs text-right leading-relaxed shrink-0 py-2 px-3 xs:px-4">
+            {t('homeSourceKJV')}
+          </p>
+        </div>
       </header>
 
       <div className="flex-1 flex flex-col items-center justify-center px-3 xs:px-4 sm:px-6 py-4 xs:py-5 sm:py-8 pb-[max(1rem,env(safe-area-inset-bottom))] overflow-x-hidden w-full box-border">

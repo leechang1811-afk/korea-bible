@@ -24,6 +24,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     homeDonation: '이 앱의 광고 수익 10%는 교회 아이들 교육을 위한 장학금으로 기부됩니다.',
     homeDonationLine1: '이 앱의 광고 수익 10%는',
     homeDonationLine2: '교회 아이들 교육을 위한 장학금으로 기부됩니다.',
+    homeSourceKJV: '출처 : 킹제임스역(KJV)',
     homeBibleBook: '성경책 보기',
 
     // 성경책 보기
@@ -140,6 +141,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     homeDonation: '10% of this app\'s ad revenue is donated to church children\'s education scholarships.',
     homeDonationLine1: '10% of this app\'s ad revenue is',
     homeDonationLine2: 'donated to church children\'s education scholarships.',
+    homeSourceKJV: 'Source: King James Version (KJV)',
     homeBibleBook: 'View Bible',
 
     bibleBookTitle: 'View Bible',
