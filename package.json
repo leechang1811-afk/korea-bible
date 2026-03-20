@@ -11,7 +11,8 @@
     "fetch-kjv-korean": "node scripts/fetch-kjv-korean.cjs",
     "translate-kjv": "node scripts/translate-kjv-to-korean.mjs",
     "extract-remaining-ot": "node scripts/extract-remaining-ot-from-krv.mjs",
-    "generate-translations": "node scripts/generate-all-translations.mjs"
+    "generate-translations": "node scripts/generate-all-translations.mjs",
+    "split-kjv": "node scripts/split-kjv-by-book.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.99.2",

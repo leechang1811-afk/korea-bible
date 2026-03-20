@@ -1,12 +1,24 @@
+import { useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AuthBanner } from '../components/AuthBanner';
 import { useTranslation } from '../hooks/useTranslation';
 import { useBibleStore } from '../store/bibleStore';
+import { getScheduleFromBook, getReadingByDayIndex } from '../data/bibleSchedule';
+import { preloadBook } from '../services/bibleCache';
 
 export default function BibleHome() {
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const { bibleVersion, setBibleVersion } = useBibleStore();
+  const { bibleVersion, setBibleVersion, startBookId, customOrder, currentDayIndex } = useBibleStore();
+  const schedule = useMemo(
+    () => getScheduleFromBook(startBookId, customOrder ?? undefined),
+    [startBookId, customOrder]
+  );
+  const reading = getReadingByDayIndex(schedule, currentDayIndex);
+
+  useEffect(() => {
+    if (reading) preloadBook(reading.bookId);
+  }, [reading?.bookId]);
 
   return (
     <div className="min-h-screen min-h-[100dvh] flex flex-col bg-white overflow-x-hidden w-full max-w-full">

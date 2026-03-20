@@ -1,13 +1,26 @@
 /**
  * 성경 본문 로드
  * - KJV(King James Version, public domain) only
+ * - 책별 분할 로딩으로 1일1독 페이지 속도 개선
  * - 한국어 설명: 별도 explanations.json (저작권 없는 해설)
- * - 본문과 해설은 명확히 분리
  */
 
 import explanationsData from '../data/explanations.json';
+import { loadBook as loadBookFromCache, bookCache } from './bibleCache';
 
 type BibleData = Record<string, string>;
+
+const BOOK_IDS = [
+  'genesis', 'exodus', 'leviticus', 'numbers', 'deuteronomy', 'joshua', 'judges', 'ruth',
+  '1samuel', '2samuel', '1kings', '2kings', '1chronicles', '2chronicles', 'ezra', 'nehemiah',
+  'esther', 'job', 'psalms', 'proverbs', 'ecclesiastes', 'song', 'isaiah', 'jeremiah',
+  'lamentations', 'ezekiel', 'daniel', 'hosea', 'joel', 'amos', 'obadiah', 'jonah', 'micah',
+  'nahum', 'habakkuk', 'zephaniah', 'haggai', 'zechariah', 'malachi', 'matthew', 'mark',
+  'luke', 'john', 'acts', 'romans', '1corinthians', '2corinthians', 'galatians', 'ephesians',
+  'philippians', 'colossians', '1thessalonians', '2thessalonians', '1timothy', '2timothy',
+  'titus', 'philemon', 'hebrews', 'james', '1peter', '2peter', '1john', '2john', '3john',
+  'jude', 'revelation',
+] as const;
 
 function decodeHtmlEntities(text: string): string {
   return text
@@ -24,12 +37,18 @@ export type BibleVersion = 'ko' | 'en';
 
 const cache: { kjv?: BibleData } = {};
 
-/** KJV 성경 본문 (항상 동일) */
+/** 특정 책만 로드 (1일1독용, ~200KB vs 4.7MB) */
+export async function loadBook(bookId: string): Promise<BibleData> {
+  return loadBookFromCache(bookId);
+}
+
+/** KJV 전체 (성경책 보기, 말씀 뽑기용) - 책별 병렬 로드 */
 export async function loadBible(_version?: BibleVersion): Promise<BibleData> {
   if (cache.kjv) return cache.kjv;
-  const res = await fetch('/bible/kjv.json');
-  if (!res.ok) throw new Error('Failed to load Bible.');
-  cache.kjv = (await res.json()) as BibleData;
+  await Promise.all(BOOK_IDS.map((id) => loadBookFromCache(id)));
+  const merged: BibleData = {};
+  for (const id of BOOK_IDS) Object.assign(merged, bookCache[id] || {});
+  cache.kjv = merged;
   return cache.kjv;
 }
 
@@ -48,7 +67,7 @@ export async function getVerses(
   endCh: number,
   _version: BibleVersion = 'ko'
 ): Promise<{ chapter: number; verse: number; text: string; explanation?: string }[]> {
-  const data = await loadBible();
+  const data = await loadBook(bookId);
   const explanations = await loadExplanations();
   const result: { chapter: number; verse: number; text: string; explanation?: string }[] = [];
   for (let ch = startCh; ch <= endCh; ch++) {
