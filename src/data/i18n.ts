@@ -66,6 +66,15 @@ export const translations: Record<Locale, Record<string, string>> = {
     noReading: '해당 일차의 읽기가 없습니다.',
     goToDay1: '제1일로',
     dayN: '제 {n}일',
+    dayComplete: '완료 체크',
+
+    // 진도율
+    homeProgress: '1일1독 진도율',
+    progressTitle: '1일1독 진도율',
+    progressPercent: '전체 {percent}% 완료',
+    progressCompleted: '{count}일 완료',
+    progressCalendar: '완료한 날짜',
+    progressCompletedDates: '완료한 날짜',
 
     // 말씀 읽기
     todayGodWord: '오늘의 하나님 말씀',
@@ -184,6 +193,14 @@ export const translations: Record<Locale, Record<string, string>> = {
     noReading: 'No reading for this day.',
     goToDay1: 'Go to Day 1',
     dayN: 'Day {n}',
+    dayComplete: 'Mark complete',
+
+    homeProgress: '1 Day 1 Read Progress',
+    progressTitle: '1 Day 1 Read Progress',
+    progressPercent: '{percent}% complete',
+    progressCompleted: '{count} days completed',
+    progressCalendar: 'Completed dates',
+    progressCompletedDates: 'Completed dates',
 
     todayGodWord: "Today's Word from God",
     prayerFirst: 'Please pray first before reading the Word',

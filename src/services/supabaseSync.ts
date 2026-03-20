@@ -1,5 +1,5 @@
 import { supabase } from '../lib/supabase';
-import type { BibleMemo, BibleBookmark, BibleDailyVerse } from '../store/bibleStore';
+import type { BibleMemo, BibleBookmark, BibleDailyVerse, CompletedDay } from '../store/bibleStore';
 
 function toDbMemo(m: BibleMemo) {
   return {
@@ -53,13 +53,22 @@ function fromDbVerse(r: Record<string, unknown>): BibleDailyVerse {
   };
 }
 
+function fromDbCompletedDay(r: Record<string, unknown>): CompletedDay {
+  return {
+    dayIndex: r.day_index as number,
+    date: r.date as string,
+    createdAt: new Date(r.created_at as string).getTime(),
+  };
+}
+
 export async function loadFromSupabase(userId: string) {
   if (!supabase) return null;
 
-  const [memosRes, bookmarksRes, versesRes, settingsRes] = await Promise.all([
+  const [memosRes, bookmarksRes, versesRes, completedRes, settingsRes] = await Promise.all([
     supabase.from('bible_memos').select('*').eq('user_id', userId).order('created_at', { ascending: false }),
     supabase.from('bible_bookmarks').select('*').eq('user_id', userId).order('created_at', { ascending: false }),
     supabase.from('bible_daily_verses').select('*').eq('user_id', userId).order('created_at', { ascending: false }),
+    supabase.from('bible_completed_days').select('*').eq('user_id', userId).order('created_at', { ascending: false }),
     supabase.from('bible_user_settings').select('*').eq('user_id', userId).single(),
   ]);
 
@@ -69,6 +78,7 @@ export async function loadFromSupabase(userId: string) {
     memos: (memosRes.data || []).map(fromDbMemo),
     bookmarks: (bookmarksRes.data || []).map(fromDbBookmark),
     dailyVerses: (versesRes.data || []).map(fromDbVerse),
+    completedDays: (completedRes.data || []).map(fromDbCompletedDay),
     settings: settingsRes.data
       ? {
           startBookId: (settingsRes.data as Record<string, unknown>).start_book_id as string,
@@ -134,6 +144,24 @@ export async function removeDailyVerseFromSupabase(id: string) {
   await supabase.from('bible_daily_verses').delete().eq('id', id);
 }
 
+export async function addCompletedDayToSupabase(c: CompletedDay, userId: string) {
+  if (!supabase) return;
+  await supabase.from('bible_completed_days').insert({
+    user_id: userId,
+    day_index: c.dayIndex,
+    date: c.date,
+  });
+}
+
+export async function removeCompletedDayFromSupabase(dayIndex: number, date: string, userId: string) {
+  if (!supabase) return;
+  await supabase.from('bible_completed_days')
+    .delete()
+    .eq('user_id', userId)
+    .eq('day_index', dayIndex)
+    .eq('date', date);
+}
+
 export async function saveSettingsToSupabase(userId: string, settings: {
   startBookId: string;
   customOrder: string[] | null;
@@ -155,6 +183,7 @@ export async function syncAllToSupabase(
     memos: BibleMemo[];
     bookmarks: BibleBookmark[];
     dailyVerses: BibleDailyVerse[];
+    completedDays: CompletedDay[];
     startBookId: string;
     customOrder: string[] | null;
     currentDayIndex: number;
@@ -165,6 +194,8 @@ export async function syncAllToSupabase(
   await supabase.from('bible_memos').delete().eq('user_id', userId);
   await supabase.from('bible_bookmarks').delete().eq('user_id', userId);
   await supabase.from('bible_daily_verses').delete().eq('user_id', userId);
+  const completedDel = await supabase.from('bible_completed_days').delete().eq('user_id', userId);
+  const hasCompletedTable = !completedDel.error;
 
   if (data.memos.length > 0) {
     await supabase.from('bible_memos').insert(
@@ -203,6 +234,15 @@ export async function syncAllToSupabase(
         chapter: v.chapter,
         verse: v.verse,
         text: v.text,
+      }))
+    );
+  }
+  if (hasCompletedTable && data.completedDays.length > 0) {
+    await supabase.from('bible_completed_days').insert(
+      data.completedDays.map((c) => ({
+        user_id: userId,
+        day_index: c.dayIndex,
+        date: c.date,
       }))
     );
   }

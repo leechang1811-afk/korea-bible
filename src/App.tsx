@@ -8,6 +8,7 @@ const BibleVersePicker = lazy(() => import('./pages/BibleVersePicker'));
 const BibleDaily = lazy(() => import('./pages/BibleDaily'));
 const BibleSettings = lazy(() => import('./pages/BibleSettings'));
 const BibleJournal = lazy(() => import('./pages/BibleJournal'));
+const BibleProgress = lazy(() => import('./pages/BibleProgress'));
 
 function PageFallback() {
   return (
@@ -28,6 +29,7 @@ export default function App() {
           <Route path="/read" element={<BibleDaily />} />
           <Route path="/settings" element={<BibleSettings />} />
           <Route path="/journal" element={<BibleJournal />} />
+          <Route path="/progress" element={<BibleProgress />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </Suspense>

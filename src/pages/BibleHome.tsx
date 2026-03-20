@@ -6,7 +6,7 @@ import { useBibleStore } from '../store/bibleStore';
 export default function BibleHome() {
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const { bibleVersion, setBibleVersion } = useBibleStore();
+  const { bibleVersion, setBibleVersion, completedDays } = useBibleStore();
 
   return (
     <div className="min-h-screen min-h-[100dvh] flex flex-col bg-white overflow-x-hidden w-full max-w-full">
@@ -64,6 +64,20 @@ export default function BibleHome() {
             >
               {t('homeStart')}
             </button>
+            {completedDays.length > 0 && (
+              <button
+                onClick={() => navigate('/progress')}
+                className="w-full min-h-[48px] py-3.5 xs:py-4 rounded-xl xs:rounded-2xl font-semibold text-sm xs:text-base text-[#1B64F2] bg-white border border-[#E6EAF2] active:opacity-80"
+              >
+                📊 {t('homeProgress')}
+              </button>
+            )}
+            <button
+              onClick={() => navigate('/bible')}
+              className="w-full min-h-[48px] py-3.5 xs:py-4 rounded-xl xs:rounded-2xl font-semibold text-sm xs:text-base text-[#5B6475] bg-white border border-[#E6EAF2] active:opacity-80"
+            >
+              {t('homeBibleBook')}
+            </button>
             <button
               onClick={() => navigate('/journal')}
               className="w-full min-h-[48px] py-3.5 xs:py-4 rounded-xl xs:rounded-2xl font-semibold text-sm xs:text-base text-[#1B64F2] bg-white border border-[#E6EAF2] active:opacity-80"
@@ -81,12 +95,6 @@ export default function BibleHome() {
               className="w-full min-h-[48px] py-3.5 xs:py-4 rounded-xl xs:rounded-2xl font-semibold text-sm xs:text-base text-[#1B64F2] bg-white border border-[#E6EAF2] active:opacity-80"
             >
               {t('homeDailyVerses')}
-            </button>
-            <button
-              onClick={() => navigate('/bible')}
-              className="w-full min-h-[48px] py-3.5 xs:py-4 rounded-xl xs:rounded-2xl font-semibold text-sm xs:text-base text-[#5B6475] bg-white border border-[#E6EAF2] active:opacity-80"
-            >
-              {t('homeBibleBook')}
             </button>
           </div>
           <p className="text-[#94a3b8] text-[10px] xs:text-xs text-center mt-4 xs:mt-6 leading-relaxed px-1">

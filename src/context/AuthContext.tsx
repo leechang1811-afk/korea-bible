@@ -42,6 +42,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               memos: data.memos,
               bookmarks: data.bookmarks,
               dailyVerses: data.dailyVerses,
+              completedDays: data.completedDays ?? [],
               ...(data.settings && {
                 startBookId: data.settings.startBookId,
                 customOrder: data.settings.customOrder,
@@ -77,6 +78,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         memos: data.memos,
         bookmarks: data.bookmarks,
         dailyVerses: data.dailyVerses,
+        completedDays: data.completedDays ?? [],
         ...(data.settings && {
           startBookId: data.settings.startBookId,
           customOrder: data.settings.customOrder,

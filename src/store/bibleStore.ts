@@ -36,6 +36,12 @@ export interface BibleDailyVerse {
   createdAt: number;
 }
 
+export interface CompletedDay {
+  dayIndex: number;
+  date: string;
+  createdAt: number;
+}
+
 const genId = () => crypto.randomUUID?.() ?? `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
 
 export const useBibleStore = create<{
@@ -47,7 +53,10 @@ export const useBibleStore = create<{
   bookmarks: BibleBookmark[];
   memos: BibleMemo[];
   dailyVerses: BibleDailyVerse[];
+  completedDays: CompletedDay[];
   setStartBook: (bookId: string) => void;
+  toggleDayComplete: (dayIndex: number, date: string) => void;
+  isDayComplete: (dayIndex: number, date: string) => boolean;
   setBibleVersion: (v: BibleVersion) => void;
   setShowExplanation: (v: boolean) => void;
   setCustomOrder: (order: string[] | null) => void;
@@ -75,7 +84,24 @@ export const useBibleStore = create<{
       bookmarks: [],
       memos: [],
       dailyVerses: [],
+      completedDays: [],
       setStartBook: (bookId) => set({ startBookId: bookId }),
+      toggleDayComplete: (dayIndex, date) => {
+        const { completedDays } = get();
+        const existing = completedDays.find((c) => c.dayIndex === dayIndex && c.date === date);
+        if (existing) {
+          set({ completedDays: completedDays.filter((c) => c !== existing) });
+        } else {
+          set({
+            completedDays: [
+              ...completedDays,
+              { dayIndex, date, createdAt: Date.now() },
+            ],
+          });
+        }
+      },
+      isDayComplete: (dayIndex, date) =>
+        get().completedDays.some((c) => c.dayIndex === dayIndex && c.date === date),
       setCustomOrder: (order) => set({ customOrder: order }),
       setBibleVersion: (v) => set({ bibleVersion: v }),
       setShowExplanation: (v) => set({ showExplanation: v }),
@@ -179,6 +205,16 @@ export const useBibleStore = create<{
         ).sort((a, b) => b.createdAt - a.createdAt);
       },
     }),
-    { name: 'bible-daily-storage' }
+    {
+      name: 'bible-daily-storage',
+      merge: (persisted, current) => {
+        const p = persisted as Record<string, unknown> | undefined;
+        const merged = { ...current, ...p };
+        if (merged.bibleVersion !== 'ko' && merged.bibleVersion !== 'en') {
+          merged.bibleVersion = 'ko';
+        }
+        return merged;
+      },
+    }
   )
 );

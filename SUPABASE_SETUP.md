@@ -1,5 +1,10 @@
 # Supabase 연동 설정
 
+## 0. bible_completed_days 테이블 (1일1독 완료 체크)
+
+1일1독 완료 체크 데이터 동기화를 위해 `bible_completed_days` 테이블이 필요합니다.
+자세한 SQL은 `docs/SUPABASE_COMPLETED_DAYS.md`를 참고하세요.
+
 ## 1. 환경 변수
 
 프로젝트 루트에 `.env` 파일 생성:

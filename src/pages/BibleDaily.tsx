@@ -33,6 +33,8 @@ export default function BibleDaily() {
     isBookmarked,
     saveMemo,
     memos,
+    toggleDayComplete,
+    isDayComplete,
   } = useBibleStore();
 
   const schedule = useMemo(
@@ -236,7 +238,7 @@ export default function BibleDaily() {
           >
             ‹
           </button>
-          <span className="text-[#0B1220] font-bold text-base xs:text-lg">
+          <span className="flex-1 text-[#0B1220] font-bold text-base xs:text-lg text-center">
             {t('dayN', { n: currentDayIndex })}
           </span>
           <button
@@ -245,6 +247,18 @@ export default function BibleDaily() {
             className="w-10 h-10 min-w-[40px] min-h-[40px] rounded-full bg-white border border-[#E6EAF2] flex items-center justify-center disabled:opacity-40 touch-target"
           >
             ›
+          </button>
+          <button
+            onClick={() => toggleDayComplete(currentDayIndex, today)}
+            className={`w-10 h-10 min-w-[40px] min-h-[40px] rounded-lg flex items-center justify-center touch-target border ${
+              isDayComplete(currentDayIndex, today)
+                ? 'bg-[#1B64F2] text-white border-[#1B64F2]'
+                : 'bg-white border-[#E6EAF2] text-[#94a3b8]'
+            }`}
+            title={t('dayComplete')}
+            aria-label={t('dayComplete')}
+          >
+            {isDayComplete(currentDayIndex, today) ? '✓' : '○'}
           </button>
         </div>
 
