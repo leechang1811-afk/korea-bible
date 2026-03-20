@@ -49,6 +49,7 @@ function fromDbVerse(r: Record<string, unknown>): BibleDailyVerse {
     chapter: r.chapter as number,
     verse: r.verse as number,
     text: r.text as string,
+    explanation: (r.explanation as string) || undefined,
     createdAt: new Date(r.created_at as string).getTime(),
   };
 }
@@ -136,6 +137,7 @@ export async function addDailyVerseToSupabase(verse: BibleDailyVerse, userId: st
     chapter: verse.chapter,
     verse: verse.verse,
     text: verse.text,
+    explanation: verse.explanation || null,
   });
 }
 
@@ -234,6 +236,7 @@ export async function syncAllToSupabase(
         chapter: v.chapter,
         verse: v.verse,
         text: v.text,
+        explanation: v.explanation || null,
       }))
     );
   }

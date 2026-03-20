@@ -298,7 +298,15 @@ function DailyVerseCard({
       </button>
       {expanded && (
         <div className="px-4 xs:px-6 pb-4 xs:pb-6 pt-0 border-t border-[#E6EAF2]">
-          <p className="text-[#0B1220] text-sm xs:text-base leading-relaxed mt-3 xs:mt-4 break-words">{item.text}</p>
+          <p className="text-[#0B1220] text-sm xs:text-base leading-relaxed mt-3 xs:mt-4 break-words">
+            {item.explanation ?? item.text}
+          </p>
+          {item.explanation && item.text && (
+            <div className="mt-3 pl-3 border-l-2 border-[#E6EAF2] text-[#5B6475] text-sm">
+              <span className="text-[#94a3b8] text-xs font-medium">{t('englishKJVLabel')}</span>
+              <p className="mt-1 leading-relaxed">{item.text}</p>
+            </div>
+          )}
           {onDelete && (
             <button onClick={onDelete} className="mt-4 text-red-500 text-sm">
               {t('delete')}

@@ -10,7 +10,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     back: '← 뒤로',
     appTitle: '성경 1일1독',
     settings: '설정',
-    journal: '일기장',
+    journal: '나의 기록',
     todayRead: '오늘 읽기',
 
     // 홈
@@ -101,7 +101,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     chronologicalNote: '연대기순 성경읽기표 기준',
 
     // 일기장
-    myJournal: '내 일기장',
+    myJournal: '나의 기록',
     tabMemo: '메모',
     tabBookmarks: '찜',
     tabVerses: '받은 말씀',

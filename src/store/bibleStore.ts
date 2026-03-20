@@ -33,6 +33,7 @@ export interface BibleDailyVerse {
   chapter: number;
   verse: number;
   text: string;
+  explanation?: string;
   createdAt: number;
 }
 
@@ -67,7 +68,7 @@ export const useBibleStore = create<{
   saveMemo: (memo: Omit<BibleMemo, 'id' | 'createdAt'>) => void;
   updateMemo: (id: string, updates: Partial<BibleMemo>) => void;
   deleteMemo: (id: string) => void;
-  addDailyVerse: (verse: { bookName: string; chapter: number; verse: number; text: string }, date: string) => void;
+  addDailyVerse: (verse: { bookName: string; chapter: number; verse: number; text: string; explanation?: string }, date: string) => void;
   removeDailyVerse: (id: string) => void;
   getMemosByDate: () => { date: string; items: (BibleMemo | BibleBookmark)[] }[];
   getDailyVersesByDate: () => { date: string; items: BibleDailyVerse[] }[];
@@ -199,6 +200,7 @@ export const useBibleStore = create<{
         return dailyVerses.filter(
           (v) =>
             check(v.text) ||
+            (v.explanation && check(v.explanation)) ||
             check(v.bookName) ||
             check(`${v.bookName} ${v.chapter}:${v.verse}`) ||
             check(v.date)
