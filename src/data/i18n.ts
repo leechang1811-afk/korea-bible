@@ -67,6 +67,8 @@ export const translations: Record<Locale, Record<string, string>> = {
     goToDay1: '제1일로',
     dayN: '제 {n}일',
     dayComplete: '완료 체크',
+    readConfirm: '읽음 확인',
+    resetReadPlan: '성경 1일1독 초기화하기',
 
     // 진도율
     homeProgress: '1일1독 진도율',
@@ -194,6 +196,8 @@ export const translations: Record<Locale, Record<string, string>> = {
     goToDay1: 'Go to Day 1',
     dayN: 'Day {n}',
     dayComplete: 'Mark complete',
+    readConfirm: 'Read confirm',
+    resetReadPlan: 'Reset 1 Day 1 Read',
 
     homeProgress: '1 Day 1 Read Progress',
     progressTitle: '1 Day 1 Read Progress',

@@ -27,6 +27,7 @@ export default function BibleDaily() {
     currentDayIndex,
     bibleVersion,
     setBibleVersion,
+    setStartBook,
     setCurrentDay,
     addBookmark,
     removeBookmark,
@@ -250,15 +251,16 @@ export default function BibleDaily() {
           </button>
           <button
             onClick={() => toggleDayComplete(currentDayIndex, today)}
-            className={`w-10 h-10 min-w-[40px] min-h-[40px] rounded-lg flex items-center justify-center touch-target border ${
+            className={`min-h-[44px] px-3 xs:px-4 py-2 rounded-xl flex items-center gap-1.5 touch-target border transition-all active:scale-95 ${
               isDayComplete(currentDayIndex, today)
                 ? 'bg-[#1B64F2] text-white border-[#1B64F2]'
-                : 'bg-white border-[#E6EAF2] text-[#94a3b8]'
+                : 'bg-white border-[#E6EAF2] text-[#5B6475] hover:bg-[#f8fafc]'
             }`}
-            title={t('dayComplete')}
-            aria-label={t('dayComplete')}
+            title={t('readConfirm')}
+            aria-label={t('readConfirm')}
           >
-            {isDayComplete(currentDayIndex, today) ? '✓' : '○'}
+            <span className="text-base">{isDayComplete(currentDayIndex, today) ? '✓' : '○'}</span>
+            <span className="text-xs xs:text-sm font-medium whitespace-nowrap">{t('readConfirm')}</span>
           </button>
         </div>
 
@@ -269,9 +271,9 @@ export default function BibleDaily() {
           className="bg-white rounded-xl xs:rounded-2xl shadow-sm border border-[#E6EAF2] overflow-hidden"
         >
           <div className="p-4 xs:p-5 sm:p-6">
-            {/* 1행: 한국어 / 영어 번역 - 모바일은 한/EN, sm 이상은 전체 표시 */}
-            <div className="mb-3 xs:mb-4">
-              <div className="flex rounded-lg overflow-hidden border border-[#E6EAF2] w-fit">
+            {/* 1행: 한국어 / 영어 / 초기화 */}
+            <div className="mb-3 xs:mb-4 flex flex-wrap items-center gap-2">
+              <div className="flex rounded-lg overflow-hidden border border-[#E6EAF2]">
                 <button
                   onClick={() => setBibleVersion('ko')}
                   className={`min-h-[44px] min-w-[44px] px-2 xs:px-2.5 min-390:px-3 py-1.5 text-[11px] xs:text-xs font-medium touch-target ${bibleVersion === 'ko' ? 'bg-[#1B64F2] text-white' : 'bg-white text-[#5B6475] hover:bg-[#f1f5f9] active:bg-[#E6EAF2]'}`}
@@ -289,6 +291,18 @@ export default function BibleDaily() {
                   <span className="hidden sm:inline">{t('english')}</span>
                 </button>
               </div>
+              <button
+                onClick={() => {
+                  setStartBook('genesis');
+                  setCurrentDay(1);
+                  navigate('/settings');
+                }}
+                className="min-h-[44px] px-2 xs:px-3 py-1.5 rounded-lg text-[11px] xs:text-xs font-medium touch-target bg-white border border-[#E6EAF2] text-[#5B6475] hover:bg-[#f1f5f9] active:scale-95 active:bg-[#E6EAF2]"
+                title={t('resetReadPlan')}
+              >
+                <span className="hidden min-390:inline">{t('resetReadPlan')}</span>
+                <span className="min-390:hidden">초기화</span>
+              </button>
             </div>
 
             {/* 2행: 음향 버튼들 + 찜하기 */}
