@@ -271,8 +271,8 @@ export default function BibleDaily() {
           className="bg-white rounded-xl xs:rounded-2xl shadow-sm border border-[#E6EAF2] overflow-hidden"
         >
           <div className="p-4 xs:p-5 sm:p-6">
-            {/* 1행: 한국어 / 영어 / 초기화 */}
-            <div className="mb-3 xs:mb-4 flex flex-wrap items-center gap-2">
+            {/* 1행: 한국어 / 영어 (좌) | 다른 전서 선택하기 (우) */}
+            <div className="mb-3 xs:mb-4 flex items-center justify-between gap-2">
               <div className="flex rounded-lg overflow-hidden border border-[#E6EAF2]">
                 <button
                   onClick={() => setBibleVersion('ko')}
@@ -297,11 +297,10 @@ export default function BibleDaily() {
                   setCurrentDay(1);
                   navigate('/settings');
                 }}
-                className="min-h-[44px] px-2 xs:px-3 py-1.5 rounded-lg text-[11px] xs:text-xs font-medium touch-target bg-white border border-[#E6EAF2] text-[#5B6475] hover:bg-[#f1f5f9] active:scale-95 active:bg-[#E6EAF2]"
-                title={t('resetReadPlan')}
+                className="min-h-[44px] px-2 xs:px-3 py-1.5 rounded-lg text-[11px] xs:text-xs font-medium touch-target bg-white border border-[#E6EAF2] text-[#5B6475] hover:bg-[#f1f5f9] active:scale-95 active:bg-[#E6EAF2] shrink-0"
+                title={t('selectOtherBook')}
               >
-                <span className="hidden min-390:inline">{t('resetReadPlan')}</span>
-                <span className="min-390:hidden">초기화</span>
+                {t('selectOtherBook')}
               </button>
             </div>
 
