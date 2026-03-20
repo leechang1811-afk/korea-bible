@@ -87,8 +87,9 @@ const QUESTIONS_EN: Record<BookType, [string, string]> = {
   ],
 };
 
-export function getMeditationQuestions(bookId: string, locale: Locale = 'ko'): [string, string] {
+/** 해당 페이지(책 유형) 내용 기반 묵상 질문 1개 반환 */
+export function getMeditationQuestion(bookId: string, locale: Locale = 'ko'): string {
   const type = BOOK_TYPE_MAP[bookId] ?? 'epistle';
   const questions = locale === 'en' ? QUESTIONS_EN : QUESTIONS_KO;
-  return questions[type];
+  return questions[type][0];
 }

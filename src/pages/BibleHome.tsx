@@ -78,7 +78,7 @@ export default function BibleHome() {
             </button>
             <button
               onClick={() => navigate('/journal')}
-              className="w-full min-h-[48px] py-3.5 xs:py-4 rounded-xl xs:rounded-2xl font-semibold text-sm xs:text-base text-[#1B64F2] bg-white border border-[#E6EAF2] active:opacity-80"
+              className="w-full min-h-[48px] py-3.5 xs:py-4 rounded-xl xs:rounded-2xl font-semibold text-sm xs:text-base text-[#1B64F2] bg-white border border-[#E6EAF2] active:opacity-80 mt-4 xs:mt-5"
             >
               {t('homeMyMemo')}
             </button>

@@ -6,7 +6,7 @@ import {
   getReadingByDayIndex,
   type ReadingItem,
 } from '../data/bibleSchedule';
-import { getMeditationQuestions } from '../data/meditationQuestions';
+import { getMeditationQuestion } from '../data/meditationQuestions';
 import { useBibleStore } from '../store/bibleStore';
 import { useBibleTTS } from '../hooks/useBibleTTS';
 import { getVerses, getBookName } from '../services/bibleText';
@@ -45,10 +45,9 @@ export default function BibleDaily() {
 
   const reading = getReadingByDayIndex(schedule, currentDayIndex);
   const { t, locale } = useTranslation();
-  const [q1, q2] = reading ? getMeditationQuestions(reading.bookId, locale) : ['', ''];
+  const q = reading ? getMeditationQuestion(reading.bookId, locale) : '';
 
   const [memo1, setMemo1] = useState('');
-  const [memo2, setMemo2] = useState('');
   const [dailyNote, setDailyNote] = useState('');
   const [verses, setVerses] = useState<{ chapter: number; verse: number; text: string; explanation?: string }[]>([]);
   const [versesLoading, setVersesLoading] = useState(true);
@@ -73,11 +72,9 @@ export default function BibleDaily() {
   useEffect(() => {
     if (existingMemo) {
       setMemo1(existingMemo.memo1);
-      setMemo2(existingMemo.memo2);
       setDailyNote(existingMemo.dailyNote);
     } else {
       setMemo1('');
-      setMemo2('');
       setDailyNote('');
     }
   }, [existingMemo, currentDayIndex, today]);
@@ -117,7 +114,6 @@ export default function BibleDaily() {
     if (existingMemo) {
       useBibleStore.getState().updateMemo(existingMemo.id, {
         memo1,
-        memo2,
         dailyNote,
       });
     } else {
@@ -125,10 +121,10 @@ export default function BibleDaily() {
         dayIndex: reading.dayIndex,
         readingRef: `${reading.book} ${reading.startCh}${reading.endCh !== reading.startCh ? `-${reading.endCh}` : ''}장`,
         date: today,
-        question1: q1,
-        question2: q2,
+        question1: q,
+        question2: '',
         memo1,
-        memo2,
+        memo2: '',
         dailyNote,
       });
     }
@@ -403,7 +399,7 @@ export default function BibleDaily() {
 
           <div className="bg-white rounded-xl xs:rounded-2xl p-4 xs:p-5 sm:p-6 shadow-sm border border-[#E6EAF2]">
             <p className="text-[#5B6475] text-sm mb-2 font-medium">{t('question1')}</p>
-            <p className="text-[#0B1220] mb-4">{q1}</p>
+            <p className="text-[#0B1220] mb-4">{q}</p>
             <textarea
               value={memo1}
               onChange={(e) => setMemo1(e.target.value)}
@@ -412,18 +408,7 @@ export default function BibleDaily() {
             />
           </div>
 
-          <div className="bg-white rounded-2xl p-6 shadow-sm border border-[#E6EAF2]">
-            <p className="text-[#5B6475] text-sm mb-2 font-medium">{t('question2')}</p>
-            <p className="text-[#0B1220] mb-4">{q2}</p>
-            <textarea
-              value={memo2}
-              onChange={(e) => setMemo2(e.target.value)}
-              placeholder={t('memoPlaceholder')}
-              className="w-full min-h-[72px] xs:min-h-[80px] p-3 xs:p-4 rounded-xl border border-[#E6EAF2] text-[15px] xs:text-base text-[#0B1220] placeholder-[#94a3b8] resize-none"
-            />
-          </div>
-
-          <div className="bg-white rounded-2xl p-6 shadow-sm border border-[#E6EAF2]">
+          <div className="bg-white rounded-xl xs:rounded-2xl p-4 xs:p-5 sm:p-6 shadow-sm border border-[#E6EAF2]">
             <p className="text-[#5B6475] text-sm mb-2 font-medium">{t('todayNote')}</p>
             <textarea
               value={dailyNote}
