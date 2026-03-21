@@ -6,10 +6,16 @@ import { useBibleStore } from '../store/bibleStore';
 import { getScheduleFromBook, getReadingByDayIndex } from '../data/bibleSchedule';
 import { preloadBook } from '../services/bibleCache';
 
+const RECORD_ITEMS: { tab: string | null; key: string; icon: string }[] = [
+  { tab: null, key: 'tabMemo', icon: '✏️' },
+  { tab: 'bookmarks', key: 'tabBookmarks', icon: '♥' },
+  { tab: 'verses', key: 'tabVerses', icon: '📜' },
+];
+
 export default function BibleHome() {
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const { bibleVersion, setBibleVersion, startBookId, customOrder, currentDayIndex } = useBibleStore();
+  const { bibleVersion, setBibleVersion, startBookId, customOrder, currentDayIndex, memos, bookmarks, dailyVerses } = useBibleStore();
   const schedule = useMemo(
     () => getScheduleFromBook(startBookId, customOrder ?? undefined),
     [startBookId, customOrder]
@@ -88,24 +94,34 @@ export default function BibleHome() {
             >
               {t('homeBibleBook')}
             </button>
-            <button
-              onClick={() => navigate('/journal')}
-              className="w-full min-h-[48px] py-3.5 xs:py-4 rounded-xl xs:rounded-2xl font-semibold text-sm xs:text-base text-[#1B64F2] bg-white border border-[#E6EAF2] active:opacity-80 mt-4 xs:mt-5"
-            >
-              {t('homeMyMemo')}
-            </button>
-            <button
-              onClick={() => navigate('/journal?tab=bookmarks')}
-              className="w-full min-h-[48px] py-3.5 xs:py-4 rounded-xl xs:rounded-2xl font-semibold text-sm xs:text-base text-[#1B64F2] bg-white border border-[#E6EAF2] active:opacity-80"
-            >
-              {t('homeBookmarks')}
-            </button>
-            <button
-              onClick={() => navigate('/journal?tab=verses')}
-              className="w-full min-h-[48px] py-3.5 xs:py-4 rounded-xl xs:rounded-2xl font-semibold text-sm xs:text-base text-[#1B64F2] bg-white border border-[#E6EAF2] active:opacity-80"
-            >
-              {t('homeDailyVerses')}
-            </button>
+            {/* 나의 기록 - 토스 스타일 그룹 카드 */}
+            <div className="mt-4 xs:mt-5">
+              <p className="text-[#94a3b8] text-[11px] xs:text-xs font-medium mb-2 px-0.5">{t('myJournal')}</p>
+              <div className="rounded-xl xs:rounded-2xl overflow-hidden bg-white border border-[#E6EAF2]">
+                {RECORD_ITEMS.map((item, i) => {
+                  const count =
+                    item.tab === null ? memos.length :
+                    item.tab === 'bookmarks' ? bookmarks.length :
+                    dailyVerses.length;
+                  const href = item.tab ? `/journal?tab=${item.tab}` : '/journal';
+                  return (
+                    <button
+                      key={item.tab ?? 'memo'}
+                      onClick={() => navigate(href)}
+                      className={`w-full flex items-center gap-3 px-4 xs:px-5 py-3.5 xs:py-4 text-left active:bg-[#f8fafc] touch-target min-h-[52px] ${i > 0 ? 'border-t border-[#E6EAF2]' : ''}`}
+                      aria-label={t(item.key)}
+                    >
+                      <span className="text-base xs:text-lg" aria-hidden>{item.icon}</span>
+                      <span className="flex-1 text-[#0B1220] text-sm xs:text-base font-medium">{t(item.key)}</span>
+                      {count > 0 && (
+                        <span className="text-[#94a3b8] text-xs font-medium tabular-nums">{count}</span>
+                      )}
+                      <span className="text-[#94a3b8] text-sm" aria-hidden>›</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
           </div>
           <p className="text-[#94a3b8] text-[10px] xs:text-xs text-center mt-4 xs:mt-6 leading-relaxed px-1">
             {t('homeDonationLine1')}
