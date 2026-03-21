@@ -324,7 +324,7 @@ export default function BibleDaily() {
                 <span className="text-[11px] font-medium hidden xs:inline">{t('bookmark')}</span>
               </button>
               <button
-                onClick={() => toggleDayComplete(currentDayIndex, getTodayDateString())}
+                onClick={() => toggleDayComplete(currentDayIndex, today)}
                 className={`min-h-[36px] px-2.5 rounded-lg flex items-center gap-1.5 touch-target ${
                   isDayComplete(currentDayIndex)
                     ? 'bg-[#1B64F2] text-white'

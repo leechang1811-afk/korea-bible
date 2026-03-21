@@ -26,29 +26,41 @@ export default function BibleProgress() {
   );
 
   const totalDays = schedule.length;
+  /** dayIndex당 가장 오래전에 체크한 것만 사용 (진도율·캘린더·목록) */
+  const completedByOldest = useMemo(() => {
+    const byDay = new Map<number, typeof completedDays[0]>();
+    for (const c of completedDays) {
+      const existing = byDay.get(c.dayIndex);
+      if (!existing || c.date < existing.date || (c.date === existing.date && c.createdAt < existing.createdAt)) {
+        byDay.set(c.dayIndex, c);
+      }
+    }
+    return Array.from(byDay.values());
+  }, [completedDays]);
+
   const completedDayIndexes = useMemo(
-    () => new Set(completedDays.map((c) => c.dayIndex)),
-    [completedDays]
+    () => new Set(completedByOldest.map((c) => c.dayIndex)),
+    [completedByOldest]
   );
   const completedCount = completedDayIndexes.size;
   const percent = totalDays > 0 ? Math.round((completedCount / totalDays) * 100) : 0;
 
   const completedByDate = useMemo(() => {
     const set = new Set<string>();
-    completedDays.forEach((c) => set.add(c.date));
+    completedByOldest.forEach((c) => set.add(c.date));
     return set;
-  }, [completedDays]);
+  }, [completedByOldest]);
 
   const completedListWithRef = useMemo(
     () =>
-      completedDays
+      completedByOldest
         .map((c) => {
           const r = getReadingByDayIndex(schedule, c.dayIndex);
           const ref = r ? `${r.book} ${r.startCh}${r.endCh !== r.startCh ? `-${r.endCh}` : ''}장` : '';
           return { ...c, readingRef: ref };
         })
         .sort((a, b) => b.date.localeCompare(a.date)),
-    [completedDays, schedule]
+    [completedByOldest, schedule]
   );
 
   const now = new Date();
