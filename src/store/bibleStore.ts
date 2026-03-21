@@ -57,7 +57,7 @@ export const useBibleStore = create<{
   completedDays: CompletedDay[];
   setStartBook: (bookId: string) => void;
   toggleDayComplete: (dayIndex: number, date: string) => void;
-  isDayComplete: (dayIndex: number, date: string) => boolean;
+  isDayComplete: (dayIndex: number) => boolean;
   setBibleVersion: (v: BibleVersion) => void;
   setShowExplanation: (v: boolean) => void;
   setCustomOrder: (order: string[] | null) => void;
@@ -89,9 +89,9 @@ export const useBibleStore = create<{
       setStartBook: (bookId) => set({ startBookId: bookId }),
       toggleDayComplete: (dayIndex, date) => {
         const { completedDays } = get();
-        const existing = completedDays.find((c) => c.dayIndex === dayIndex && c.date === date);
+        const existing = completedDays.find((c) => c.dayIndex === dayIndex);
         if (existing) {
-          set({ completedDays: completedDays.filter((c) => c !== existing) });
+          set({ completedDays: completedDays.filter((c) => c.dayIndex !== dayIndex) });
         } else {
           set({
             completedDays: [
@@ -101,8 +101,8 @@ export const useBibleStore = create<{
           });
         }
       },
-      isDayComplete: (dayIndex, date) =>
-        get().completedDays.some((c) => c.dayIndex === dayIndex && c.date === date),
+      isDayComplete: (dayIndex) =>
+        get().completedDays.some((c) => c.dayIndex === dayIndex),
       setCustomOrder: (order) => set({ customOrder: order }),
       setBibleVersion: (v) => set({ bibleVersion: v }),
       setShowExplanation: (v) => set({ showExplanation: v }),

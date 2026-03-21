@@ -324,16 +324,16 @@ export default function BibleDaily() {
                 <span className="text-[11px] font-medium hidden xs:inline">{t('bookmark')}</span>
               </button>
               <button
-                onClick={() => toggleDayComplete(currentDayIndex, today)}
+                onClick={() => toggleDayComplete(currentDayIndex, getTodayDateString())}
                 className={`min-h-[36px] px-2.5 rounded-lg flex items-center gap-1.5 touch-target ${
-                  isDayComplete(currentDayIndex, today)
+                  isDayComplete(currentDayIndex)
                     ? 'bg-[#1B64F2] text-white'
                     : 'bg-[#E6EAF2] text-[#5B6475]'
                 }`}
                 aria-label={t('readConfirm')}
                 title={t('readConfirm')}
               >
-                <span className="text-sm font-medium">{isDayComplete(currentDayIndex, today) ? '✓' : '○'}</span>
+                <span className="text-sm font-medium">{isDayComplete(currentDayIndex) ? '✓' : '○'}</span>
                 <span className="text-[11px] font-medium hidden xs:inline">{t('readConfirm')}</span>
               </button>
               <div className="relative ml-auto" ref={moreRef}>
