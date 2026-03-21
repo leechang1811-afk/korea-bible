@@ -54,6 +54,17 @@ export default function BibleDaily() {
   const [ttsPlaying, setTtsPlaying] = useState(false);
   const ttsCurrentVerseRef = useRef(0);
   const [ttsStoppedAtIndex, setTtsStoppedAtIndex] = useState<number | null>(null);
+  const [moreOpen, setMoreOpen] = useState(false);
+  const moreRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!moreOpen) return;
+    const onClick = (e: MouseEvent) => {
+      if (moreRef.current && !moreRef.current.contains(e.target as Node)) setMoreOpen(false);
+    };
+    document.addEventListener('click', onClick);
+    return () => document.removeEventListener('click', onClick);
+  }, [moreOpen]);
 
   useEffect(() => {
     if (!reading) return;
@@ -233,42 +244,49 @@ export default function BibleDaily() {
           className="bg-white rounded-xl xs:rounded-2xl shadow-sm border border-[#E6EAF2] overflow-hidden"
         >
           <div className="p-4 xs:p-5 sm:p-6">
-            {/* 1) 메인: 오늘의 말씀 제목 + 날짜 네비 */}
-            <div className="flex items-center justify-between gap-3 mb-4">
-              <div className="flex items-center gap-2 min-w-0">
+            {/* 1) 메인: 제 N일 (일차 네비) + 오늘의 말씀 */}
+            <div className="mb-4">
+              <div className="flex items-center justify-center gap-2 mb-2">
                 <button
                   onClick={() => setCurrentDay(Math.max(1, currentDayIndex - 1))}
                   disabled={currentDayIndex <= 1}
-                  className="w-8 h-8 rounded-full bg-[#f8fafc] flex items-center justify-center text-[#5B6475] disabled:opacity-40 touch-target shrink-0"
-                  aria-label="이전"
+                  className="w-8 h-8 rounded-full bg-[#EEF4FF] flex items-center justify-center text-[#1B64F2] disabled:opacity-40 touch-target"
+                  aria-label={t('dayN', { n: currentDayIndex - 1 })}
                 >
                   ‹
                 </button>
-                <h2 className="text-lg xs:text-xl font-bold text-[#0B1220] truncate">{refText}</h2>
+                <span className="text-[#1B64F2] font-bold text-sm min-w-[4rem] text-center">
+                  {t('dayN', { n: currentDayIndex })}
+                </span>
                 <button
                   onClick={() => setCurrentDay(currentDayIndex + 1)}
                   disabled={currentDayIndex >= schedule.length}
-                  className="w-8 h-8 rounded-full bg-[#f8fafc] flex items-center justify-center text-[#5B6475] disabled:opacity-40 touch-target shrink-0"
-                  aria-label="다음"
+                  className="w-8 h-8 rounded-full bg-[#EEF4FF] flex items-center justify-center text-[#1B64F2] disabled:opacity-40 touch-target"
+                  aria-label={t('dayN', { n: currentDayIndex + 1 })}
                 >
                   ›
                 </button>
               </div>
-              <span className="text-[#94a3b8] text-xs shrink-0">{t('dayN', { n: currentDayIndex })}</span>
+              <p className="text-[#94a3b8] text-[11px] text-center mb-1">
+                {t('daysOfTotal', { total: schedule.length })}
+              </p>
+              <h2 className="text-lg xs:text-xl font-bold text-[#0B1220] text-center break-words">{refText}</h2>
             </div>
 
-            {/* 2) 단일 툴바: 한/EN | 🔊 | ♡ | ✓ | ⋯ */}
+            {/* 2) 툴바: 한/EN | 🔊 | 찜 | 읽음 | ⋯ + 레이블 */}
             <div className="flex items-center gap-2 flex-wrap mb-6">
               <div className="flex rounded-lg overflow-hidden border border-[#E6EAF2]">
                 <button
                   onClick={() => setBibleVersion('ko')}
                   className={`px-2.5 py-1.5 text-xs font-medium touch-target ${bibleVersion === 'ko' ? 'bg-[#1B64F2] text-white' : 'bg-white text-[#5B6475]'}`}
+                  aria-label={t('korean')}
                 >
                   한
                 </button>
                 <button
                   onClick={() => setBibleVersion('en')}
                   className={`px-2.5 py-1.5 text-xs font-medium touch-target ${bibleVersion === 'en' ? 'bg-[#1B64F2] text-white' : 'bg-white text-[#5B6475]'}`}
+                  aria-label={t('english')}
                 >
                   EN
                 </button>
@@ -279,6 +297,7 @@ export default function BibleDaily() {
                 className={`w-9 h-9 rounded-lg flex items-center justify-center touch-target ${
                   ttsPlaying ? 'bg-[#dc2626] text-white' : 'bg-[#EEF4FF] text-[#1B64F2]'
                 }`}
+                aria-label={ttsPlaying ? t('stopTTS') : t('listen')}
                 title={ttsPlaying ? t('stopTTS') : t('listen')}
               >
                 {ttsPlaying ? '⏹' : '🔊'}
@@ -287,6 +306,7 @@ export default function BibleDaily() {
                 <button
                   onClick={handleReplayFromStart}
                   className="w-9 h-9 rounded-lg flex items-center justify-center bg-[#EEF4FF] text-[#1B64F2] touch-target"
+                  aria-label={t('replayFromStart')}
                   title={t('replayFromStart')}
                 >
                   🔄
@@ -294,31 +314,54 @@ export default function BibleDaily() {
               )}
               <button
                 onClick={handleBookmark}
-                className={`w-9 h-9 rounded-lg flex items-center justify-center touch-target text-lg ${
-                  bookmarked ? 'text-pink-500 bg-pink-50' : 'bg-[#EEF4FF] text-[#94a3b8]'
+                className={`min-h-[36px] px-2.5 rounded-lg flex items-center gap-1.5 touch-target ${
+                  bookmarked ? 'text-pink-500 bg-pink-50' : 'bg-[#EEF4FF] text-[#5B6475]'
                 }`}
+                aria-label={bookmarked ? t('unbookmark') : t('bookmark')}
                 title={bookmarked ? t('unbookmark') : t('bookmark')}
               >
-                {bookmarked ? '♥' : '♡'}
+                <span className="text-lg">{bookmarked ? '♥' : '♡'}</span>
+                <span className="text-[11px] font-medium hidden xs:inline">{t('bookmark')}</span>
               </button>
               <button
                 onClick={() => toggleDayComplete(currentDayIndex, today)}
-                className={`w-9 h-9 rounded-lg flex items-center justify-center touch-target text-sm font-medium ${
+                className={`min-h-[36px] px-2.5 rounded-lg flex items-center gap-1.5 touch-target ${
                   isDayComplete(currentDayIndex, today)
                     ? 'bg-[#1B64F2] text-white'
                     : 'bg-[#E6EAF2] text-[#5B6475]'
                 }`}
+                aria-label={t('readConfirm')}
                 title={t('readConfirm')}
               >
-                {isDayComplete(currentDayIndex, today) ? '✓' : '○'}
+                <span className="text-sm font-medium">{isDayComplete(currentDayIndex, today) ? '✓' : '○'}</span>
+                <span className="text-[11px] font-medium hidden xs:inline">{t('readConfirm')}</span>
               </button>
-              <button
-                onClick={() => { setStartBook('genesis'); setCurrentDay(1); navigate('/settings'); }}
-                className="w-9 h-9 rounded-lg flex items-center justify-center bg-[#f1f5f9] text-[#5B6475] touch-target ml-auto"
-                title={t('selectOtherBook')}
-              >
-                ⋯
-              </button>
+              <div className="relative ml-auto" ref={moreRef}>
+                <button
+                  onClick={() => setMoreOpen((o) => !o)}
+                  className="w-9 h-9 rounded-lg flex items-center justify-center bg-[#f1f5f9] text-[#5B6475] touch-target"
+                  aria-label={t('selectOtherBook')}
+                  aria-expanded={moreOpen}
+                >
+                  ⋯
+                </button>
+                {moreOpen && (
+                  <div className="absolute right-0 top-full mt-1 py-1.5 rounded-xl bg-white border border-[#E6EAF2] shadow-lg z-20 min-w-[180px]">
+                    <button
+                      onClick={() => { setMoreOpen(false); setStartBook('genesis'); setCurrentDay(1); navigate('/settings'); }}
+                      className="w-full px-4 py-2.5 text-left text-sm text-[#0B1220] hover:bg-[#f8fafc]"
+                    >
+                      {t('selectOtherBook')}
+                    </button>
+                    <button
+                      onClick={() => { setMoreOpen(false); navigate('/settings'); }}
+                      className="w-full px-4 py-2.5 text-left text-sm text-[#0B1220] hover:bg-[#f8fafc]"
+                    >
+                      {t('settings')}
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
 
             {/* 3) 본문 내용 */}
