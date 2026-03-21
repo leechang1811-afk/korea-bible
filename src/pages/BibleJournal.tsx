@@ -91,32 +91,46 @@ export default function BibleJournal() {
             {t('tabVerses')}
           </button>
         </div>
-        {/* 일자별 · 검색 */}
-        <div className="mb-4 xs:mb-6 space-y-2 xs:space-y-3">
-          <div className="flex gap-2">
-            <input
-              type="date"
-              value={dateFilter}
-              onChange={(e) => setDateFilter(e.target.value)}
-              className="flex-1 min-w-0 px-3 xs:px-4 py-2.5 xs:py-3 rounded-lg xs:rounded-xl border border-[#E6EAF2] text-[#0B1220] text-sm"
-            />
-            <button
-              onClick={() => setDateFilter('')}
-              className="flex-shrink-0 px-3 xs:px-4 py-2.5 xs:py-3 min-h-[44px] rounded-lg xs:rounded-xl border border-[#E6EAF2] text-[#5B6475] text-sm"
-            >
-              {t('reset')}
-            </button>
+        {/* 찾기 - 토스 스타일: 날짜 검색 · 텍스트 검색 */}
+        <div className="mb-4 xs:mb-6">
+          <div className="rounded-xl xs:rounded-2xl overflow-hidden bg-white border border-[#E6EAF2] p-3 xs:p-4 space-y-3 xs:space-y-4">
+            <div>
+              <p className="text-[#5B6475] text-[11px] xs:text-xs font-medium mb-1.5">{t('dateFilterLabel')}</p>
+              <div className="flex gap-2">
+                <input
+                  type="date"
+                  id="journal-date-filter"
+                  value={dateFilter}
+                  onChange={(e) => setDateFilter(e.target.value)}
+                  className="flex-1 min-w-0 px-3 xs:px-4 py-2.5 xs:py-3 rounded-lg xs:rounded-xl border border-[#E6EAF2] bg-[#f8fafc] text-[#0B1220] text-sm"
+                  aria-label={t('dateFilterLabel')}
+                />
+                <button
+                  onClick={() => setDateFilter('')}
+                  className={`flex-shrink-0 px-3 xs:px-4 py-2.5 xs:py-3 min-h-[44px] rounded-lg xs:rounded-xl text-sm font-medium touch-target ${
+                    dateFilter ? 'bg-[#EEF4FF] text-[#1B64F2] border border-[#1B64F2]' : 'bg-[#f8fafc] text-[#94a3b8] border border-[#E6EAF2]'
+                  }`}
+                  aria-label={t('reset')}
+                >
+                  {t('reset')}
+                </button>
+              </div>
+            </div>
+            <div>
+              <p className="text-[#5B6475] text-[11px] xs:text-xs font-medium mb-1.5">{t('searchLabel')}</p>
+              <input
+                type="search"
+                value={search}
+                onChange={(e) => {
+                  setSearch(e.target.value);
+                  setViewMode(e.target.value.trim() ? 'search' : 'list');
+                }}
+                placeholder={tab === 'verses' ? t('searchVerse') : t('searchMemo')}
+                className="w-full px-3 xs:px-4 py-2.5 xs:py-3 rounded-lg xs:rounded-xl border border-[#E6EAF2] bg-[#f8fafc] text-sm text-[#0B1220] placeholder-[#94a3b8]"
+                aria-label={t('searchLabel')}
+              />
+            </div>
           </div>
-          <input
-            type="text"
-            value={search}
-            onChange={(e) => {
-              setSearch(e.target.value);
-              setViewMode(e.target.value.trim() ? 'search' : 'list');
-            }}
-            placeholder={tab === 'verses' ? t('searchVerse') : t('searchMemo')}
-            className="w-full px-3 xs:px-4 py-2.5 xs:py-3 rounded-lg xs:rounded-xl border border-[#E6EAF2] text-sm text-[#0B1220] placeholder-[#94a3b8]"
-          />
         </div>
 
         {tab === 'verses' ? (
