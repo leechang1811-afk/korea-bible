@@ -226,131 +226,104 @@ export default function BibleDaily() {
       </header>
 
       <div className="p-2 xs:p-3 min-375:p-4 min-390:p-5 sm:p-6 max-w-2xl mx-auto w-full box-border">
-        {/* Day selector */}
-        <div className="flex items-center gap-2 xs:gap-3 mb-4 xs:mb-6">
-          <button
-            onClick={() => setCurrentDay(Math.max(1, currentDayIndex - 1))}
-            disabled={currentDayIndex <= 1}
-            className="w-10 h-10 min-w-[40px] min-h-[40px] rounded-full bg-white border border-[#E6EAF2] flex items-center justify-center disabled:opacity-40 touch-target"
-          >
-            ‹
-          </button>
-          <span className="flex-1 text-[#0B1220] font-bold text-base xs:text-lg text-center">
-            {t('dayN', { n: currentDayIndex })}
-          </span>
-          <button
-            onClick={() => setCurrentDay(currentDayIndex + 1)}
-            disabled={currentDayIndex >= schedule.length}
-            className="w-10 h-10 min-w-[40px] min-h-[40px] rounded-full bg-white border border-[#E6EAF2] flex items-center justify-center disabled:opacity-40 touch-target"
-          >
-            ›
-          </button>
-          <button
-            onClick={() => toggleDayComplete(currentDayIndex, today)}
-            className={`min-h-[44px] px-3 xs:px-4 py-2 rounded-xl flex items-center gap-1.5 touch-target border transition-all active:scale-95 ${
-              isDayComplete(currentDayIndex, today)
-                ? 'bg-[#1B64F2] text-white border-[#1B64F2]'
-                : 'bg-white border-[#E6EAF2] text-[#5B6475] hover:bg-[#f8fafc]'
-            }`}
-            title={t('readConfirm')}
-            aria-label={t('readConfirm')}
-          >
-            <span className="text-base">{isDayComplete(currentDayIndex, today) ? '✓' : '○'}</span>
-            <span className="text-xs xs:text-sm font-medium whitespace-nowrap">{t('readConfirm')}</span>
-          </button>
-        </div>
-
-        {/* Reading card */}
+        {/* Reading card - 심플 토스 스타일 */}
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           className="bg-white rounded-xl xs:rounded-2xl shadow-sm border border-[#E6EAF2] overflow-hidden"
         >
           <div className="p-4 xs:p-5 sm:p-6">
-            {/* 1행: 한국어 / 영어 (좌) | 다른 전서 선택하기 (우) */}
-            <div className="mb-3 xs:mb-4 flex items-center justify-between gap-2">
+            {/* 1) 메인: 오늘의 말씀 제목 + 날짜 네비 */}
+            <div className="flex items-center justify-between gap-3 mb-4">
+              <div className="flex items-center gap-2 min-w-0">
+                <button
+                  onClick={() => setCurrentDay(Math.max(1, currentDayIndex - 1))}
+                  disabled={currentDayIndex <= 1}
+                  className="w-8 h-8 rounded-full bg-[#f8fafc] flex items-center justify-center text-[#5B6475] disabled:opacity-40 touch-target shrink-0"
+                  aria-label="이전"
+                >
+                  ‹
+                </button>
+                <h2 className="text-lg xs:text-xl font-bold text-[#0B1220] truncate">{refText}</h2>
+                <button
+                  onClick={() => setCurrentDay(currentDayIndex + 1)}
+                  disabled={currentDayIndex >= schedule.length}
+                  className="w-8 h-8 rounded-full bg-[#f8fafc] flex items-center justify-center text-[#5B6475] disabled:opacity-40 touch-target shrink-0"
+                  aria-label="다음"
+                >
+                  ›
+                </button>
+              </div>
+              <span className="text-[#94a3b8] text-xs shrink-0">{t('dayN', { n: currentDayIndex })}</span>
+            </div>
+
+            {/* 2) 단일 툴바: 한/EN | 🔊 | ♡ | ✓ | ⋯ */}
+            <div className="flex items-center gap-2 flex-wrap mb-6">
               <div className="flex rounded-lg overflow-hidden border border-[#E6EAF2]">
                 <button
                   onClick={() => setBibleVersion('ko')}
-                  className={`min-h-[44px] min-w-[44px] px-2 xs:px-2.5 min-390:px-3 py-1.5 text-[11px] xs:text-xs font-medium touch-target ${bibleVersion === 'ko' ? 'bg-[#1B64F2] text-white' : 'bg-white text-[#5B6475] hover:bg-[#f1f5f9] active:bg-[#E6EAF2]'}`}
-                  title={t('korean')}
+                  className={`px-2.5 py-1.5 text-xs font-medium touch-target ${bibleVersion === 'ko' ? 'bg-[#1B64F2] text-white' : 'bg-white text-[#5B6475]'}`}
                 >
-                  <span className="sm:hidden">한</span>
-                  <span className="hidden sm:inline">{t('korean')}</span>
+                  한
                 </button>
                 <button
                   onClick={() => setBibleVersion('en')}
-                  className={`min-h-[44px] min-w-[44px] px-2 xs:px-2.5 min-390:px-3 py-1.5 text-[11px] xs:text-xs font-medium touch-target ${bibleVersion === 'en' ? 'bg-[#1B64F2] text-white' : 'bg-white text-[#5B6475] hover:bg-[#f1f5f9] active:bg-[#E6EAF2]'}`}
-                  title={t('english')}
+                  className={`px-2.5 py-1.5 text-xs font-medium touch-target ${bibleVersion === 'en' ? 'bg-[#1B64F2] text-white' : 'bg-white text-[#5B6475]'}`}
                 >
-                  <span className="sm:hidden">EN</span>
-                  <span className="hidden sm:inline">{t('english')}</span>
+                  EN
                 </button>
               </div>
               <button
-                onClick={() => {
-                  setStartBook('genesis');
-                  setCurrentDay(1);
-                  navigate('/settings');
-                }}
-                className="min-h-[44px] px-2 xs:px-3 py-1.5 rounded-lg text-[11px] xs:text-xs font-medium touch-target bg-white border border-[#E6EAF2] text-[#5B6475] hover:bg-[#f1f5f9] active:scale-95 active:bg-[#E6EAF2] shrink-0"
-                title={t('selectOtherBook')}
+                onClick={ttsPlaying ? handleStop : handleListen}
+                disabled={!reading && !ttsPlaying}
+                className={`w-9 h-9 rounded-lg flex items-center justify-center touch-target ${
+                  ttsPlaying ? 'bg-[#dc2626] text-white' : 'bg-[#EEF4FF] text-[#1B64F2]'
+                }`}
+                title={ttsPlaying ? t('stopTTS') : t('listen')}
               >
-                {t('selectOtherBook')}
+                {ttsPlaying ? '⏹' : '🔊'}
               </button>
-            </div>
-
-            {/* 2행: 음향 버튼들 + 찜하기 */}
-            <div className="flex flex-wrap items-center gap-1.5 xs:gap-2 mb-6 min-390:mb-8">
-              <div className="flex items-center gap-1 xs:gap-1.5 flex-wrap">
-                <button
-                  onClick={handleListen}
-                  disabled={ttsPlaying}
-                  className={`px-2 xs:px-2.5 min-390:px-3 py-1.5 rounded-lg text-[11px] xs:text-xs font-medium min-h-[44px] min-w-[44px] flex items-center gap-1 touch-target ${
-                    !ttsPlaying ? 'bg-[#1B64F2] text-white' : 'bg-[#E6EAF2] text-[#94a3b8]'
-                  }`}
-                  title={t('listen')}
-                >
-                  🔊 {t('listen')}
-                </button>
-                <button
-                  onClick={handleStop}
-                  disabled={!ttsPlaying}
-                  className={`px-2 xs:px-2.5 min-390:px-3 py-1.5 rounded-lg text-[11px] xs:text-xs font-medium min-h-[44px] min-w-[44px] flex items-center gap-1 touch-target ${
-                    ttsPlaying ? 'bg-[#dc2626] text-white' : 'bg-[#E6EAF2] text-[#94a3b8]'
-                  }`}
-                  title={t('stopTTS')}
-                >
-                  ⏹ {t('stopTTS')}
-                </button>
+              {ttsPlaying && (
                 <button
                   onClick={handleReplayFromStart}
-                  className="px-2 xs:px-2.5 min-390:px-3 py-1.5 rounded-lg text-[11px] xs:text-xs font-medium min-h-[44px] min-w-[44px] flex items-center gap-1 bg-[#EEF4FF] text-[#1B64F2] hover:bg-[#1B64F2]/10 touch-target"
+                  className="w-9 h-9 rounded-lg flex items-center justify-center bg-[#EEF4FF] text-[#1B64F2] touch-target"
                   title={t('replayFromStart')}
                 >
-                  🔄 {t('replayFromStartShort')}
+                  🔄
                 </button>
-              </div>
+              )}
               <button
                 onClick={handleBookmark}
-                className={`p-2 rounded-lg min-h-[44px] min-w-[44px] flex items-center justify-center touch-target text-xl ${bookmarked ? 'text-pink-500 bg-pink-50' : 'bg-[#EEF4FF] text-[#94a3b8]'} hover:opacity-80 active:opacity-70`}
+                className={`w-9 h-9 rounded-lg flex items-center justify-center touch-target text-lg ${
+                  bookmarked ? 'text-pink-500 bg-pink-50' : 'bg-[#EEF4FF] text-[#94a3b8]'
+                }`}
                 title={bookmarked ? t('unbookmark') : t('bookmark')}
               >
                 {bookmarked ? '♥' : '♡'}
               </button>
+              <button
+                onClick={() => toggleDayComplete(currentDayIndex, today)}
+                className={`w-9 h-9 rounded-lg flex items-center justify-center touch-target text-sm font-medium ${
+                  isDayComplete(currentDayIndex, today)
+                    ? 'bg-[#1B64F2] text-white'
+                    : 'bg-[#E6EAF2] text-[#5B6475]'
+                }`}
+                title={t('readConfirm')}
+              >
+                {isDayComplete(currentDayIndex, today) ? '✓' : '○'}
+              </button>
+              <button
+                onClick={() => { setStartBook('genesis'); setCurrentDay(1); navigate('/settings'); }}
+                className="w-9 h-9 rounded-lg flex items-center justify-center bg-[#f1f5f9] text-[#5B6475] touch-target ml-auto"
+                title={t('selectOtherBook')}
+              >
+                ⋯
+              </button>
             </div>
 
-            {/* 오늘의 말씀 (토글 아래, 여백 두고) */}
-            <div>
-              <p className="text-[#1B64F2] font-semibold text-sm mb-1">
-                {t(locale === 'ko' ? 'todayWord' : 'todayWordEn')}
-              </p>
-              <h2 className="text-lg xs:text-xl font-bold text-[#0B1220] break-words">{refText}</h2>
-            </div>
-
-            {/* 본문 내용 */}
-            <div className="mt-6 pt-6 border-t border-[#E6EAF2]">
-              <p className="text-[#5B6475] text-xs mb-4 font-medium">
+            {/* 3) 본문 내용 */}
+            <div className="pt-4 border-t border-[#E6EAF2]">
+              <p className="text-[#94a3b8] text-[11px] mb-4">
                 {t('bibleSourceKJV')}
               </p>
               {versesLoading ? (

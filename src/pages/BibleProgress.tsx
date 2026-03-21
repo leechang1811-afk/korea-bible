@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getScheduleFromBook } from '../data/bibleSchedule';
+import { getScheduleFromBook, getReadingByDayIndex } from '../data/bibleSchedule';
 import { useBibleStore } from '../store/bibleStore';
 import { useTranslation } from '../hooks/useTranslation';
 
@@ -39,10 +39,16 @@ export default function BibleProgress() {
     return set;
   }, [completedDays]);
 
-  const sortedDates = useMemo(
+  const completedListWithRef = useMemo(
     () =>
-      [...completedByDate].sort((a, b) => b.localeCompare(a)),
-    [completedByDate]
+      completedDays
+        .map((c) => {
+          const r = getReadingByDayIndex(schedule, c.dayIndex);
+          const ref = r ? `${r.book} ${r.startCh}${r.endCh !== r.startCh ? `-${r.endCh}` : ''}장` : '';
+          return { ...c, readingRef: ref };
+        })
+        .sort((a, b) => b.date.localeCompare(a.date)),
+    [completedDays, schedule]
   );
 
   const now = new Date();
@@ -172,21 +178,23 @@ export default function BibleProgress() {
             })}
           </div>
 
-          {/* 완료한 날짜 목록 */}
-          {sortedDates.length > 0 && (
+          {/* 완료한 날짜 + 읽은 구절 목록 */}
+          {completedListWithRef.length > 0 && (
             <div className="mt-6 pt-4 border-t border-[#E6EAF2]">
               <p className="text-[#5B6475] text-xs mb-2 font-medium">{t('progressCompletedDates')}</p>
-              <div className="flex flex-wrap gap-2">
-                {sortedDates.slice(0, 30).map((date) => (
-                  <span
-                    key={date}
-                    className="px-2 py-1 rounded-lg bg-[#EEF4FF] text-[#1B64F2] text-xs font-medium"
+              <div className="space-y-2 max-h-[200px] overflow-y-auto">
+                {completedListWithRef.slice(0, 50).map((c) => (
+                  <div
+                    key={`${c.dayIndex}-${c.date}`}
+                    className="flex items-center gap-2 px-3 py-2 rounded-lg bg-[#EEF4FF] text-[#1B64F2] text-xs"
                   >
-                    {date} ✓
-                  </span>
+                    <span className="font-medium shrink-0">{c.date}</span>
+                    <span className="truncate">{c.readingRef}</span>
+                    <span className="shrink-0 ml-auto">✓</span>
+                  </div>
                 ))}
-                {sortedDates.length > 30 && (
-                  <span className="text-[#94a3b8] text-xs">+{sortedDates.length - 30}일</span>
+                {completedListWithRef.length > 50 && (
+                  <span className="text-[#94a3b8] text-xs">+{completedListWithRef.length - 50}일</span>
                 )}
               </div>
             </div>
