@@ -45,7 +45,10 @@ export default function BibleProgress() {
     [completedByOldest]
   );
   const completedCount = completedDayIndexes.size;
-  const percent = totalDays > 0 ? Math.round((completedCount / totalDays) * 100) : 0;
+  const rawPercent = totalDays > 0 ? (completedCount / totalDays) * 100 : 0;
+  // 초기 진도(1~2일)도 인지되도록: 1% 미만이면 소수 첫자리 표시, 0만 나오지 않게
+  const percentDisplay =
+    completedCount > 0 && rawPercent < 1 ? rawPercent.toFixed(1) : String(Math.round(rawPercent));
 
   const completedByDate = useMemo(() => {
     const set = new Set<string>();
@@ -144,13 +147,15 @@ export default function BibleProgress() {
             <p className="text-[#1B64F2] text-sm font-medium mb-3">{t('progressZeroMsg')}</p>
           )}
           <div className="flex items-center justify-between mb-2">
-            <span className="text-[#5B6475] text-sm font-medium">{t('progressPercent', { percent })}</span>
+            <span className="text-[#5B6475] text-sm font-medium">{t('progressPercent', { percent: percentDisplay })}</span>
             <span className="text-[#1B64F2] text-sm font-semibold">{t('progressCompleted', { count: completedCount })}</span>
           </div>
           <div className="h-3 rounded-full bg-[#E6EAF2] overflow-hidden">
             <div
               className="h-full rounded-full bg-[#1B64F2] transition-all duration-500"
-              style={{ width: `${Math.min(100, percent)}%` }}
+              style={{
+                width: `${Math.min(100, completedCount > 0 && rawPercent < 2 ? Math.max(rawPercent, 2) : rawPercent)}%`,
+              }}
             />
           </div>
         </div>
