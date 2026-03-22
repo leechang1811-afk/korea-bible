@@ -31,6 +31,7 @@ export const translations: Record<Locale, Record<string, string>> = {
 
     // 성경책 보기
     bibleBookTitle: '성경책 보기',
+    bibleSelectBook: '전서 선택',
     bibleSearchPlaceholder: '텍스트 검색...',
     bibleTranslationToggle: '번역',
     bibleShowTranslation: '한국어 번역 표시/숨기기',
@@ -180,6 +181,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     homeBibleBook: 'View Bible',
 
     bibleBookTitle: 'View Bible',
+    bibleSelectBook: 'Select Book',
     bibleSearchPlaceholder: 'Search text...',
     bibleTranslationToggle: 'Translation',
     bibleShowTranslation: 'Show/hide Korean translation',
