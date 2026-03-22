@@ -4,6 +4,7 @@ import { BrowserRouter } from 'react-router-dom';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { AuthProvider } from './context/AuthContext';
 import { BibleSyncEffect } from './components/BibleSyncEffect';
+import { ToastProvider } from './components/Toast';
 import App from './App';
 import './index.css';
 
@@ -12,8 +13,10 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
     <ErrorBoundary>
       <BrowserRouter>
         <AuthProvider>
-          <BibleSyncEffect />
-          <App />
+          <ToastProvider>
+            <BibleSyncEffect />
+            <App />
+          </ToastProvider>
         </AuthProvider>
       </BrowserRouter>
     </ErrorBoundary>

@@ -227,9 +227,16 @@ export default function BibleBookViewer() {
           <button
             onClick={() => navigate(-1)}
             className="p-1.5 xs:p-2 -ml-0.5 xs:-ml-1 rounded-lg hover:bg-gray-100 touch-target shrink-0"
-            aria-label="뒤로"
+            aria-label={t('back')}
           >
             ←
+          </button>
+          <button
+            onClick={() => navigate('/')}
+            className="p-1.5 xs:p-2 rounded-lg hover:bg-gray-100 touch-target shrink-0 text-[#5B6475] text-sm"
+            aria-label={t('home')}
+          >
+            🏠
           </button>
           <h1 className="flex-1 min-w-0 text-sm xs:text-base min-390:text-lg sm:text-xl font-bold text-[#1B64F2] truncate">
             {t('bibleBookTitle')}

@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useBibleStore, type BibleMemo, type BibleBookmark, type BibleDailyVerse } from '../store/bibleStore';
 import { useTranslation } from '../hooks/useTranslation';
+import { BottomNav } from '../components/BottomNav';
 
 function isMemo(x: BibleMemo | BibleBookmark): x is BibleMemo {
   return 'memo1' in x && 'question1' in x;
@@ -75,18 +76,21 @@ export default function BibleJournal() {
           <button
             onClick={() => navigate('/journal')}
             className={`flex-shrink-0 px-3 xs:px-4 py-2 min-h-[40px] rounded-lg xs:rounded-xl text-xs xs:text-sm font-medium ${tab !== 'bookmarks' && tab !== 'verses' ? 'bg-[#1B64F2] text-white' : 'bg-[#E6EAF2] text-[#5B6475]'}`}
+            title={t('tabMemoDesc')}
           >
             {t('tabMemo')}
           </button>
           <button
             onClick={() => navigate('/journal?tab=bookmarks')}
             className={`flex-shrink-0 px-3 xs:px-4 py-2 min-h-[40px] rounded-lg xs:rounded-xl text-xs xs:text-sm font-medium ${tab === 'bookmarks' ? 'bg-[#1B64F2] text-white' : 'bg-[#E6EAF2] text-[#5B6475]'}`}
+            title={t('tabBookmarksDesc')}
           >
             {t('tabBookmarks')}
           </button>
           <button
             onClick={() => navigate('/journal?tab=verses')}
             className={`flex-shrink-0 px-3 xs:px-4 py-2 min-h-[40px] rounded-lg xs:rounded-xl text-xs xs:text-sm font-medium ${tab === 'verses' ? 'bg-[#1B64F2] text-white' : 'bg-[#E6EAF2] text-[#5B6475]'}`}
+            title={t('tabVersesDesc')}
           >
             {t('tabVerses')}
           </button>
@@ -157,25 +161,14 @@ export default function BibleJournal() {
                 {dateFilter ? t('receivedByDateFilter', { date: dateFilter }) : t('receivedByDate')}
               </h3>
               {versesByDate.length === 0 ? (
-                <p className="text-[#94a3b8] text-center py-12">
-                  {dateFilter ? t('noVersesDate') : t('noVerses')}
-                  <br />
+                <div className="text-center py-12">
+                  <p className="text-[#94a3b8]">{dateFilter ? t('noVersesDate') : t('noVerses')}</p>
                   {dateFilter ? (
-                    <button
-                      onClick={() => setDateFilter('')}
-                      className="text-[#1B64F2] mt-2 inline-block"
-                    >
-                      {t('resetDate')}
-                    </button>
+                    <button onClick={() => setDateFilter('')} className="text-[#1B64F2] mt-3 text-sm font-medium">{t('resetDate')}</button>
                   ) : (
-                    <button
-                      onClick={() => navigate('/verse-picker')}
-                      className="text-[#1B64F2] mt-2 inline-block"
-                    >
-                      {t('goGetWord')}
-                    </button>
+                    <button onClick={() => navigate('/verse-picker')} className="mt-4 px-6 py-3 rounded-xl bg-[#1B64F2] text-white text-sm font-semibold">{t('goGetWord')}</button>
                   )}
-                </p>
+                </div>
               ) : (
                 versesByDate.map(({ date, items }) => (
                   <div key={date}>
@@ -219,29 +212,30 @@ export default function BibleJournal() {
                 : (tab === 'bookmarks' ? t('bookmarksByDate') : t('memoByDate'))}
             </h3>
             {byDate.length === 0 ? (
-              <p className="text-[#94a3b8] text-center py-12">
-                {dateFilter
-                  ? t('noDataDate')
-                  : tab === 'bookmarks'
-                    ? t('noBookmarks')
-                    : t('noMemos')}
-                <br />
+              <div className="text-center py-12">
+                <p className="text-[#94a3b8]">
+                  {dateFilter
+                    ? t('noDataDate')
+                    : tab === 'bookmarks'
+                      ? t('noBookmarks')
+                      : t('noMemos')}
+                </p>
                 {dateFilter ? (
                   <button
                     onClick={() => setDateFilter('')}
-                    className="text-[#1B64F2] mt-2 inline-block"
+                    className="text-[#1B64F2] mt-3 text-sm font-medium"
                   >
                     {t('resetDate')}
                   </button>
                 ) : (
                   <button
                     onClick={() => navigate('/read')}
-                    className="text-[#1B64F2] mt-2 inline-block"
+                    className="mt-4 px-6 py-3 rounded-xl bg-[#1B64F2] text-white text-sm font-semibold"
                   >
                     {tab === 'bookmarks' ? t('goRead') : t('goDailyRead')}
                   </button>
                 )}
-              </p>
+              </div>
             ) : (
               byDate.map(({ date, items }) => (
                 <div key={date}>
@@ -262,26 +256,7 @@ export default function BibleJournal() {
         )}
       </div>
 
-      <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-[#E6EAF2] flex justify-around py-2.5 xs:py-3 px-3 xs:px-4 pb-[max(0.75rem,env(safe-area-inset-bottom))] pl-[max(0.75rem,env(safe-area-inset-left))] pr-[max(0.75rem,env(safe-area-inset-right))]">
-        <button
-          onClick={() => navigate('/settings')}
-          className="flex flex-col items-center gap-1 text-[#5B6475] text-xs"
-        >
-          <span>⚙️</span> {t('settings')}
-        </button>
-        <button
-          onClick={() => navigate('/read')}
-          className="flex flex-col items-center gap-1 text-[#5B6475] text-xs"
-        >
-          <span>📖</span> {t('todayRead')}
-        </button>
-        <button
-          onClick={() => navigate('/journal')}
-          className="flex flex-col items-center gap-1 text-[#5B6475] text-xs"
-        >
-          <span>📓</span> {t('journal')}
-        </button>
-      </nav>
+      <BottomNav />
     </div>
   );
 }

@@ -11,6 +11,8 @@ import { useBibleStore } from '../store/bibleStore';
 import { useBibleTTS } from '../hooks/useBibleTTS';
 import { getVerses, getBookName } from '../services/bibleText';
 import { useTranslation } from '../hooks/useTranslation';
+import { toast } from '../components/Toast';
+import { BottomNav } from '../components/BottomNav';
 
 function getTodayDateString() {
   const d = new Date();
@@ -127,6 +129,7 @@ export default function BibleDaily() {
         memo1,
         dailyNote,
       });
+      toast(t('wordSaved'));
     } else {
       saveMemo({
         dayIndex: reading.dayIndex,
@@ -138,6 +141,7 @@ export default function BibleDaily() {
         memo2: '',
         dailyNote,
       });
+      toast(t('wordSaved'));
     }
   };
 
@@ -225,13 +229,22 @@ export default function BibleDaily() {
             {t('back')}
           </button>
           <span className="text-[#0B1220] font-semibold text-sm">
-            {t('appTitle')}
+            {t('appTitle')} · {t('todayRead')}
           </span>
           <button
-            onClick={() => navigate('/journal')}
-            className="text-[#1B64F2] text-sm font-medium"
+            onClick={() => navigate('/settings')}
+            className="text-[#5B6475] text-sm font-medium"
+            aria-label={t('settings')}
           >
-            {t('journal')}
+            ⚙️
+          </button>
+        </div>
+        <div className="px-3 pb-2">
+          <button
+            onClick={() => navigate('/journal')}
+            className="text-[#1B64F2] text-xs font-medium"
+          >
+            {t('journal')} →
           </button>
         </div>
       </header>
@@ -252,6 +265,7 @@ export default function BibleDaily() {
                   disabled={currentDayIndex <= 1}
                   className="w-8 h-8 rounded-full bg-[#EEF4FF] flex items-center justify-center text-[#1B64F2] disabled:opacity-40 touch-target"
                   aria-label={t('dayN', { n: currentDayIndex - 1 })}
+                  title={t('dayPrev')}
                 >
                   ‹
                 </button>
@@ -263,6 +277,7 @@ export default function BibleDaily() {
                   disabled={currentDayIndex >= schedule.length}
                   className="w-8 h-8 rounded-full bg-[#EEF4FF] flex items-center justify-center text-[#1B64F2] disabled:opacity-40 touch-target"
                   aria-label={t('dayN', { n: currentDayIndex + 1 })}
+                  title={t('dayNext')}
                 >
                   ›
                 </button>
@@ -331,7 +346,7 @@ export default function BibleDaily() {
                     : 'bg-[#E6EAF2] text-[#5B6475]'
                 }`}
                 aria-label={t('readConfirm')}
-                title={t('readConfirm')}
+                title={t('readConfirmDesc')}
               >
                 <span className="text-sm font-medium">{isDayComplete(currentDayIndex) ? '✓' : '○'}</span>
                 <span className="text-[11px] font-medium hidden xs:inline">{t('readConfirm')}</span>
@@ -443,27 +458,7 @@ export default function BibleDaily() {
         </div>
       </div>
 
-      {/* 하단 네비 */}
-      <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-[#E6EAF2] flex justify-around py-2.5 xs:py-3 px-3 xs:px-4 pb-[max(0.75rem,env(safe-area-inset-bottom))] pl-[max(0.75rem,env(safe-area-inset-left))] pr-[max(0.75rem,env(safe-area-inset-right))]">
-        <button
-          onClick={() => navigate('/settings')}
-          className="flex flex-col items-center gap-1 text-[#5B6475] text-xs"
-        >
-          <span>⚙️</span> {t('settings')}
-        </button>
-        <button
-          onClick={() => navigate('/read')}
-          className="flex flex-col items-center gap-1 text-[#1B64F2] text-xs font-medium"
-        >
-          <span>📖</span> {t('todayRead')}
-        </button>
-        <button
-          onClick={() => navigate('/journal')}
-          className="flex flex-col items-center gap-1 text-[#5B6475] text-xs"
-        >
-          <span>📓</span> {t('journal')}
-        </button>
-      </nav>
+      <BottomNav />
     </div>
   );
 }

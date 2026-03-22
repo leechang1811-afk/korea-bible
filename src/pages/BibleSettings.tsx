@@ -4,17 +4,35 @@ import { BIBLE_BOOKS_ORDER } from '../data/bibleSchedule';
 import { useBibleStore } from '../store/bibleStore';
 import { useTranslation } from '../hooks/useTranslation';
 import { getBookName } from '../services/bibleText';
+import { BottomNav } from '../components/BottomNav';
+import { toast } from '../components/Toast';
+
+const POPULAR_BOOKS = ['genesis', 'exodus', 'psalms', 'proverbs', 'isaiah', 'matthew', 'mark', 'luke', 'john', 'romans'];
 
 export default function BibleSettings() {
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const { startBookId, bibleVersion, setBibleVersion, setStartBook, setCurrentDay } = useBibleStore();
+  const { startBookId, bibleVersion, setBibleVersion, setStartBook, setCurrentDay, resetReadPlan } = useBibleStore();
   const [selected, setSelected] = useState(startBookId);
+  const [resetConfirm, setResetConfirm] = useState(false);
 
   const handleApply = () => {
     setStartBook(selected);
     setCurrentDay(1);
+    toast(t('settingsApplied'));
     navigate('/read');
+  };
+
+  const handleReset = () => {
+    if (resetConfirm) {
+      resetReadPlan();
+      setResetConfirm(false);
+      toast(t('resetDone'));
+      navigate('/read');
+    } else {
+      setResetConfirm(true);
+      setTimeout(() => setResetConfirm(false), 3000);
+    }
   };
 
   return (
@@ -55,8 +73,9 @@ export default function BibleSettings() {
           {t('startBookPrompt')}
         </p>
 
-        <div className="bg-white rounded-xl xs:rounded-2xl border border-[#E6EAF2] overflow-hidden">
-          <div className="max-h-[50dvh] overflow-y-auto overscroll-contain">
+        <div className="bg-white rounded-xl xs:rounded-2xl border border-[#E6EAF2] overflow-hidden mb-4">
+          <p className="px-4 py-2 text-[#94a3b8] text-xs font-medium bg-[#f8fafc] border-b border-[#E6EAF2]">{t('bookGroupGenesis')}</p>
+          <div className="max-h-[40dvh] overflow-y-auto overscroll-contain">
             {BIBLE_BOOKS_ORDER.map((book) => (
               <button
                 key={book.id}
@@ -82,7 +101,18 @@ export default function BibleSettings() {
         <p className="text-[#94a3b8] text-xs mt-4 text-center">
           {t('chronologicalNote')}
         </p>
+
+        <div className="mt-8 pt-6 border-t border-[#E6EAF2]">
+          <button
+            onClick={handleReset}
+            className={`w-full min-h-[44px] py-3 rounded-xl text-sm font-medium ${resetConfirm ? 'bg-red-100 text-red-600' : 'text-[#94a3b8] bg-[#f8fafc] border border-[#E6EAF2]'}`}
+          >
+            {resetConfirm ? `${t('resetReadPlan')} (${t('resetConfirmTap')})` : t('resetReadPlan')}
+          </button>
+        </div>
       </div>
+
+      <BottomNav />
     </div>
   );
 }

@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { getRandomVerse } from '../services/bibleText';
 import { useBibleStore } from '../store/bibleStore';
 import { useTranslation } from '../hooks/useTranslation';
+import { toast } from '../components/Toast';
 
 function getTodayDateString() {
   const d = new Date();
@@ -29,9 +30,9 @@ export default function BibleVersePicker() {
   const [showScroll, setShowScroll] = useState(false);
   const [showContent, setShowContent] = useState(false);
 
-  // 1단계: "말씀 받기 전 기도 먼저 시작해 주세요" 표시 후 사라짐
+  // 1단계: "말씀 받기 전 기도 먼저 시작해 주세요" 표시 후 사라짐 (1.5초로 단축, 건너뛰기 가능)
   useEffect(() => {
-    const t = setTimeout(() => setStep('ready'), 3500);
+    const t = setTimeout(() => setStep('ready'), 1500);
     return () => clearTimeout(t);
   }, []);
 
@@ -67,7 +68,7 @@ export default function BibleVersePicker() {
   const handleSaveVerse = () => {
     if (verse) {
       addDailyVerse(verse, getTodayDateString());
-      alert(t('wordSaved'));
+      toast(t('wordSaved'));
     }
   };
 
@@ -98,6 +99,12 @@ export default function BibleVersePicker() {
               <p className="text-[#0B1220] text-base xs:text-lg leading-relaxed font-medium px-2">
                 {t('prayerFirst')}
               </p>
+              <button
+                onClick={() => setStep('ready')}
+                className="mt-4 text-[#94a3b8] text-sm font-medium underline"
+              >
+                {t('skipPrayer')}
+              </button>
             </motion.div>
           )}
 
@@ -190,18 +197,17 @@ export default function BibleVersePicker() {
               </motion.div>
 
               <button
+                onClick={() => navigate('/')}
+                className="w-full min-h-[48px] py-3.5 xs:py-4 rounded-xl xs:rounded-2xl font-semibold text-sm xs:text-base text-white bg-[#1B64F2]"
+              >
+                {t('goHome')}
+              </button>
+              <button
                 onClick={handleDrawVerse}
                 disabled={isDrawing}
                 className="w-full min-h-[48px] py-3.5 xs:py-4 rounded-xl xs:rounded-2xl font-semibold text-sm xs:text-base text-[#1B64F2] bg-white border-2 border-[#1B64F2] disabled:opacity-70"
               >
                 {isDrawing ? t('gettingWord') : t('getAgain')}
-              </button>
-
-              <button
-                onClick={() => navigate('/')}
-                className="w-full min-h-[48px] py-3.5 xs:py-4 rounded-xl xs:rounded-2xl font-semibold text-sm xs:text-base text-[#5B6475] bg-white border border-[#E6EAF2]"
-              >
-                {t('goHome')}
               </button>
             </motion.div>
           )}
