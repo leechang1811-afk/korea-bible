@@ -224,20 +224,23 @@ export default function BibleBookViewer() {
     <div className="min-h-screen min-h-[100dvh] flex flex-col bg-white overflow-x-hidden">
       <header className="sticky top-0 z-20 pt-[env(safe-area-inset-top)] pb-safe-bottom bg-white border-b border-[#E6EAF2]">
         <div className="flex items-center gap-1.5 xs:gap-2 min-390:gap-2.5 px-2 xs:px-3 min-390:px-4 py-2.5 min-375:py-3 min-428:py-3.5">
-          <button
-            onClick={() => navigate(-1)}
-            className="p-1.5 xs:p-2 -ml-0.5 xs:-ml-1 rounded-lg hover:bg-gray-100 touch-target shrink-0"
-            aria-label={t('back')}
-          >
-            ←
-          </button>
-          <button
-            onClick={() => navigate('/')}
-            className="p-1.5 xs:p-2 rounded-lg hover:bg-gray-100 touch-target shrink-0 text-[#5B6475] text-sm"
-            aria-label={t('home')}
-          >
-            🏠
-          </button>
+          <div className="flex items-center gap-0.5 shrink-0">
+            <button
+              onClick={() => navigate(-1)}
+              className="p-1.5 xs:p-2 -ml-0.5 xs:-ml-1 rounded-lg hover:bg-gray-100 touch-target"
+              aria-label={t('back')}
+            >
+              ←
+            </button>
+            <button
+              onClick={() => navigate('/')}
+              className="p-1.5 xs:p-2 rounded-lg hover:bg-gray-100 touch-target"
+              aria-label={t('navHome')}
+              title={t('navHome')}
+            >
+              🏠
+            </button>
+          </div>
           <h1 className="flex-1 min-w-0 text-sm xs:text-base min-390:text-lg sm:text-xl font-bold text-[#1B64F2] truncate">
             {t('bibleBookTitle')}
           </h1>

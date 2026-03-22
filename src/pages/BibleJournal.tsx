@@ -161,12 +161,24 @@ export default function BibleJournal() {
                 {dateFilter ? t('receivedByDateFilter', { date: dateFilter }) : t('receivedByDate')}
               </h3>
               {versesByDate.length === 0 ? (
-                <div className="text-center py-12">
-                  <p className="text-[#94a3b8]">{dateFilter ? t('noVersesDate') : t('noVerses')}</p>
+                <div className="text-center py-12 space-y-4">
+                  <p className="text-[#94a3b8]">
+                    {dateFilter ? t('noVersesDate') : t('noVerses')}
+                  </p>
                   {dateFilter ? (
-                    <button onClick={() => setDateFilter('')} className="text-[#1B64F2] mt-3 text-sm font-medium">{t('resetDate')}</button>
+                    <button
+                      onClick={() => setDateFilter('')}
+                      className="px-6 py-3 rounded-xl bg-[#EEF4FF] text-[#1B64F2] font-medium text-sm"
+                    >
+                      {t('resetDate')}
+                    </button>
                   ) : (
-                    <button onClick={() => navigate('/verse-picker')} className="mt-4 px-6 py-3 rounded-xl bg-[#1B64F2] text-white text-sm font-semibold">{t('goGetWord')}</button>
+                    <button
+                      onClick={() => navigate('/verse-picker')}
+                      className="px-6 py-3 rounded-xl bg-[#1B64F2] text-white font-semibold text-sm"
+                    >
+                      {t('noRecordCtaVerses')}
+                    </button>
                   )}
                 </div>
               ) : (
@@ -212,7 +224,7 @@ export default function BibleJournal() {
                 : (tab === 'bookmarks' ? t('bookmarksByDate') : t('memoByDate'))}
             </h3>
             {byDate.length === 0 ? (
-              <div className="text-center py-12">
+              <div className="text-center py-12 space-y-4">
                 <p className="text-[#94a3b8]">
                   {dateFilter
                     ? t('noDataDate')
@@ -223,16 +235,16 @@ export default function BibleJournal() {
                 {dateFilter ? (
                   <button
                     onClick={() => setDateFilter('')}
-                    className="text-[#1B64F2] mt-3 text-sm font-medium"
+                    className="px-6 py-3 rounded-xl bg-[#EEF4FF] text-[#1B64F2] font-medium text-sm"
                   >
                     {t('resetDate')}
                   </button>
                 ) : (
                   <button
-                    onClick={() => navigate('/read')}
-                    className="mt-4 px-6 py-3 rounded-xl bg-[#1B64F2] text-white text-sm font-semibold"
+                    onClick={() => navigate(tab === 'verses' ? '/verse-picker' : '/read')}
+                    className="px-6 py-3 rounded-xl bg-[#1B64F2] text-white font-semibold text-sm"
                   >
-                    {tab === 'bookmarks' ? t('goRead') : t('goDailyRead')}
+                    {tab === 'bookmarks' ? t('noRecordCtaBookmarks') : tab === 'verses' ? t('noRecordCtaVerses') : t('noRecordCtaMemo')}
                   </button>
                 )}
               </div>

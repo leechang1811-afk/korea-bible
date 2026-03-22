@@ -11,7 +11,6 @@ import { useBibleStore } from '../store/bibleStore';
 import { useBibleTTS } from '../hooks/useBibleTTS';
 import { getVerses, getBookName } from '../services/bibleText';
 import { useTranslation } from '../hooks/useTranslation';
-import { toast } from '../components/Toast';
 import { BottomNav } from '../components/BottomNav';
 
 function getTodayDateString() {
@@ -129,7 +128,6 @@ export default function BibleDaily() {
         memo1,
         dailyNote,
       });
-      toast(t('wordSaved'));
     } else {
       saveMemo({
         dayIndex: reading.dayIndex,
@@ -141,7 +139,6 @@ export default function BibleDaily() {
         memo2: '',
         dailyNote,
       });
-      toast(t('wordSaved'));
     }
   };
 
@@ -229,22 +226,13 @@ export default function BibleDaily() {
             {t('back')}
           </button>
           <span className="text-[#0B1220] font-semibold text-sm">
-            {t('appTitle')} · {t('todayRead')}
+            {t('appTitle')}
           </span>
           <button
-            onClick={() => navigate('/settings')}
-            className="text-[#5B6475] text-sm font-medium"
-            aria-label={t('settings')}
-          >
-            ⚙️
-          </button>
-        </div>
-        <div className="px-3 pb-2">
-          <button
             onClick={() => navigate('/journal')}
-            className="text-[#1B64F2] text-xs font-medium"
+            className="text-[#1B64F2] text-sm font-medium"
           >
-            {t('journal')} →
+            {t('journal')}
           </button>
         </div>
       </header>
@@ -264,8 +252,8 @@ export default function BibleDaily() {
                   onClick={() => setCurrentDay(Math.max(1, currentDayIndex - 1))}
                   disabled={currentDayIndex <= 1}
                   className="w-8 h-8 rounded-full bg-[#EEF4FF] flex items-center justify-center text-[#1B64F2] disabled:opacity-40 touch-target"
-                  aria-label={t('dayN', { n: currentDayIndex - 1 })}
-                  title={t('dayPrev')}
+                  aria-label={t('prevDay')}
+                  title={t('prevDay')}
                 >
                   ‹
                 </button>
@@ -276,8 +264,8 @@ export default function BibleDaily() {
                   onClick={() => setCurrentDay(currentDayIndex + 1)}
                   disabled={currentDayIndex >= schedule.length}
                   className="w-8 h-8 rounded-full bg-[#EEF4FF] flex items-center justify-center text-[#1B64F2] disabled:opacity-40 touch-target"
-                  aria-label={t('dayN', { n: currentDayIndex + 1 })}
-                  title={t('dayNext')}
+                  aria-label={t('nextDay')}
+                  title={t('nextDay')}
                 >
                   ›
                 </button>
@@ -346,7 +334,7 @@ export default function BibleDaily() {
                     : 'bg-[#E6EAF2] text-[#5B6475]'
                 }`}
                 aria-label={t('readConfirm')}
-                title={t('readConfirmDesc')}
+                title={t('readConfirmTooltip')}
               >
                 <span className="text-sm font-medium">{isDayComplete(currentDayIndex) ? '✓' : '○'}</span>
                 <span className="text-[11px] font-medium hidden xs:inline">{t('readConfirm')}</span>

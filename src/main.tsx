@@ -3,8 +3,8 @@ import ReactDOM from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { AuthProvider } from './context/AuthContext';
+import { ToastProvider } from './context/ToastContext';
 import { BibleSyncEffect } from './components/BibleSyncEffect';
-import { ToastProvider } from './components/Toast';
 import App from './App';
 import './index.css';
 

@@ -58,6 +58,7 @@ export const useBibleStore = create<{
   setStartBook: (bookId: string) => void;
   toggleDayComplete: (dayIndex: number, date: string) => void;
   isDayComplete: (dayIndex: number) => boolean;
+  resetReadPlan: () => void;
   setBibleVersion: (v: BibleVersion) => void;
   setShowExplanation: (v: boolean) => void;
   setCustomOrder: (order: string[] | null) => void;
@@ -74,7 +75,6 @@ export const useBibleStore = create<{
   getDailyVersesByDate: () => { date: string; items: BibleDailyVerse[] }[];
   searchMemos: (query: string) => (BibleMemo | BibleBookmark)[];
   searchDailyVerses: (query: string) => BibleDailyVerse[];
-  resetReadPlan: () => void;
 }>()(
   persist(
     (set, get) => ({
@@ -104,6 +104,7 @@ export const useBibleStore = create<{
       },
       isDayComplete: (dayIndex) =>
         get().completedDays.some((c) => c.dayIndex === dayIndex),
+      resetReadPlan: () => set({ completedDays: [], currentDayIndex: 1 }),
       setCustomOrder: (order) => set({ customOrder: order }),
       setBibleVersion: (v) => set({ bibleVersion: v }),
       setShowExplanation: (v) => set({ showExplanation: v }),
@@ -207,8 +208,6 @@ export const useBibleStore = create<{
             check(v.date)
         ).sort((a, b) => b.createdAt - a.createdAt);
       },
-      resetReadPlan: () =>
-        set({ completedDays: [], currentDayIndex: 1, startBookId: 'genesis', customOrder: null }),
     }),
     {
       name: 'bible-daily-storage',

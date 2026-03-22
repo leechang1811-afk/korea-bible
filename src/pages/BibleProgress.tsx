@@ -18,8 +18,9 @@ function getDaysInMonth(year: number, month: number) {
 
 export default function BibleProgress() {
   const navigate = useNavigate();
+  const { setCurrentDay } = useBibleStore();
   const { t } = useTranslation();
-  const { startBookId, customOrder, completedDays, setCurrentDay } = useBibleStore();
+  const { startBookId, customOrder, completedDays } = useBibleStore();
 
   const schedule = useMemo(
     () => getScheduleFromBook(startBookId, customOrder ?? undefined),
@@ -50,15 +51,6 @@ export default function BibleProgress() {
     const set = new Set<string>();
     completedByOldest.forEach((c) => set.add(c.date));
     return set;
-  }, [completedByOldest]);
-
-  const dateToDayIndex = useMemo(() => {
-    const map = new Map<string, number>();
-    completedByOldest.forEach((c) => {
-      const existing = map.get(c.date);
-      if (existing == null || c.dayIndex < existing) map.set(c.date, c.dayIndex);
-    });
-    return map;
   }, [completedByOldest]);
 
   const completedListWithRef = useMemo(
@@ -131,7 +123,7 @@ export default function BibleProgress() {
   };
 
   return (
-    <div className="min-h-screen min-h-[100dvh] bg-[#f8fafc] pb-28 overflow-x-hidden w-full max-w-full">
+    <div className="min-h-screen min-h-[100dvh] bg-[#f8fafc] pb-24 xs:pb-28 overflow-x-hidden w-full max-w-full">
       <header className="sticky top-0 z-10 bg-white border-b border-[#E6EAF2] shadow-sm pt-[max(0.5rem,env(safe-area-inset-top))]">
         <div className="flex items-center justify-between px-2 xs:px-3 min-375:px-4 min-390:px-5 py-2.5 xs:py-3 min-390:py-3.5">
           <button
@@ -148,27 +140,19 @@ export default function BibleProgress() {
       <div className="p-2 xs:p-3 min-375:p-4 min-390:p-5 sm:p-6 max-w-2xl mx-auto w-full box-border">
         {/* 게이지 */}
         <div className="bg-white rounded-xl xs:rounded-2xl p-4 xs:p-6 mb-4 xs:mb-6 border border-[#E6EAF2]">
+          {completedCount === 0 && (
+            <p className="text-[#1B64F2] text-sm font-medium mb-3">{t('progressZeroMsg')}</p>
+          )}
           <div className="flex items-center justify-between mb-2">
             <span className="text-[#5B6475] text-sm font-medium">{t('progressPercent', { percent })}</span>
             <span className="text-[#1B64F2] text-sm font-semibold">{t('progressCompleted', { count: completedCount })}</span>
           </div>
-          {percent === 0 && (
-            <p className="text-[#94a3b8] text-xs mb-2">{t('progressZeroPrompt')}</p>
-          )}
           <div className="h-3 rounded-full bg-[#E6EAF2] overflow-hidden">
             <div
               className="h-full rounded-full bg-[#1B64F2] transition-all duration-500"
               style={{ width: `${Math.min(100, percent)}%` }}
             />
           </div>
-          {percent === 0 && (
-            <button
-              onClick={() => navigate('/read')}
-              className="mt-3 w-full py-2.5 rounded-lg text-sm font-medium text-[#1B64F2] bg-[#EEF4FF]"
-            >
-              {t('progressGoRead')}
-            </button>
-          )}
         </div>
 
         {/* 달력 */}
@@ -197,17 +181,21 @@ export default function BibleProgress() {
             ))}
             {calendarDays.map((cell, idx) => {
               const completed = completedByDate.has(cell.date);
-              const dayIdx = dateToDayIndex.get(cell.date);
-              const canGo = completed && dayIdx != null;
+              const item = completedListWithRef.find((c) => c.date === cell.date);
+              const canGo = completed && item && cell.isCurrentMonth;
               return (
                 <button
                   key={`${cell.date}-${idx}`}
                   type="button"
-                  onClick={() => canGo && (setCurrentDay(dayIdx!), navigate('/read'))}
-                  disabled={!canGo}
+                  onClick={() => {
+                    if (canGo && item) {
+                      setCurrentDay(item.dayIndex);
+                      navigate('/read');
+                    }
+                  }}
                   className={`min-h-[36px] flex flex-col items-center justify-center rounded-lg text-sm ${
                     !cell.isCurrentMonth ? 'text-[#cbd5e1]' : 'text-[#0B1220]'
-                  } ${completed ? 'bg-[#1B64F2] text-white font-semibold' : ''} ${canGo ? 'touch-target cursor-pointer active:opacity-80' : 'cursor-default'}`}
+                  } ${completed ? 'bg-[#1B64F2] text-white font-semibold' : ''} ${canGo ? 'cursor-pointer hover:opacity-90' : 'cursor-default'}`}
                 >
                   {cell.day}
                   {completed && <span className="text-[10px]">✓</span>}
@@ -239,7 +227,6 @@ export default function BibleProgress() {
           )}
         </div>
       </div>
-
       <BottomNav />
     </div>
   );

@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { getRandomVerse } from '../services/bibleText';
 import { useBibleStore } from '../store/bibleStore';
 import { useTranslation } from '../hooks/useTranslation';
-import { toast } from '../components/Toast';
+import { useToast } from '../context/ToastContext';
 
 function getTodayDateString() {
   const d = new Date();
@@ -18,6 +18,7 @@ export default function BibleVersePicker() {
   const addDailyVerse = useBibleStore((s) => s.addDailyVerse);
   const bibleVersion = useBibleStore((s) => s.bibleVersion);
   const { t } = useTranslation();
+  const showToast = useToast();
   const [step, setStep] = useState<Step>('prayer');
   const [verse, setVerse] = useState<{
     bookName: string;
@@ -30,10 +31,10 @@ export default function BibleVersePicker() {
   const [showScroll, setShowScroll] = useState(false);
   const [showContent, setShowContent] = useState(false);
 
-  // 1단계: "말씀 받기 전 기도 먼저 시작해 주세요" 표시 후 사라짐 (1.5초로 단축, 건너뛰기 가능)
+  // 1단계: "말씀 받기 전 기도 먼저 시작해 주세요" 표시 후 자동 전환 (건너뛰기 가능)
   useEffect(() => {
-    const t = setTimeout(() => setStep('ready'), 1500);
-    return () => clearTimeout(t);
+    const id = setTimeout(() => setStep('ready'), 3500);
+    return () => clearTimeout(id);
   }, []);
 
   const handleDrawVerse = async () => {
@@ -68,7 +69,7 @@ export default function BibleVersePicker() {
   const handleSaveVerse = () => {
     if (verse) {
       addDailyVerse(verse, getTodayDateString());
-      toast(t('wordSaved'));
+      showToast(t('wordSaved'));
     }
   };
 
@@ -94,14 +95,14 @@ export default function BibleVersePicker() {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.5 }}
-              className="w-full max-w-[min(28rem,calc(100vw-1.5rem))] text-center"
+              className="w-full max-w-[min(28rem,calc(100vw-1.5rem))] text-center flex flex-col items-center gap-4"
             >
               <p className="text-[#0B1220] text-base xs:text-lg leading-relaxed font-medium px-2">
                 {t('prayerFirst')}
               </p>
               <button
                 onClick={() => setStep('ready')}
-                className="mt-4 text-[#94a3b8] text-sm font-medium underline"
+                className="text-[#94a3b8] text-sm font-medium underline"
               >
                 {t('skipPrayer')}
               </button>
@@ -198,10 +199,11 @@ export default function BibleVersePicker() {
 
               <button
                 onClick={() => navigate('/')}
-                className="w-full min-h-[48px] py-3.5 xs:py-4 rounded-xl xs:rounded-2xl font-semibold text-sm xs:text-base text-white bg-[#1B64F2]"
+                className="w-full min-h-[48px] py-3.5 xs:py-4 rounded-xl xs:rounded-2xl font-semibold text-sm xs:text-base text-[#5B6475] bg-white border border-[#E6EAF2]"
               >
                 {t('goHome')}
               </button>
+
               <button
                 onClick={handleDrawVerse}
                 disabled={isDrawing}
