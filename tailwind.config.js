@@ -4,6 +4,7 @@ export default {
   theme: {
     screens: {
       /* 핸드폰 화면별 최적화 */
+      'min-320': '320px',  // 초소형
       xs: '360px',      // 소형 안드로이드
       'min-375': '375px',  // iPhone SE, iPhone 6/7/8
       'min-390': '390px',  // iPhone 12/13/14

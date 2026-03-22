@@ -2,10 +2,9 @@
  * 성경 본문 로드
  * - KJV(King James Version, public domain) only
  * - 책별 분할 로딩으로 1일1독 페이지 속도 개선
- * - 한국어 설명: 별도 explanations.json (저작권 없는 해설)
+ * - 한국어 설명: 동적 로드로 초기 번들 축소
  */
 
-import explanationsData from '../data/explanations.json';
 import { loadBook as loadBookFromCache, bookCache } from './bibleCache';
 
 type BibleData = Record<string, string>;
@@ -79,9 +78,13 @@ export async function loadBibleProgressive(
   return merged;
 }
 
-/** 한국어 설명 (본문과 별도, 저작권 없는 해설) - 번들에서 직접 로드 */
+let explanationsCache: BibleData | null = null;
+/** 한국어 설명 (본문과 별도) - 필요 시에만 동적 로드해 초기 로딩 속도 개선 */
 export async function loadExplanations(): Promise<BibleData> {
-  return explanationsData as BibleData;
+  if (explanationsCache) return explanationsCache;
+  const mod = await import('../data/explanations.json');
+  explanationsCache = mod.default as BibleData;
+  return explanationsCache;
 }
 
 export function getVerseKey(bookId: string, chapter: number, verse: number): string {

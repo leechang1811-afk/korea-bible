@@ -270,7 +270,7 @@ export default function BibleBookViewer() {
   // 1. 전서 선택 화면
   if (!selectedBookId) {
     return (
-      <div className="min-h-screen min-h-[100dvh] flex flex-col bg-white overflow-x-hidden">
+      <div className="min-h-screen min-h-[100dvh] flex flex-col bg-white overflow-x-hidden w-full max-w-full">
         <header className="sticky top-0 z-20 pt-[env(safe-area-inset-top)] pb-safe-bottom bg-white border-b border-[#E6EAF2]">
           <div className="flex items-center gap-1.5 xs:gap-2 px-2 xs:px-3 min-390:px-4 py-2.5 min-375:py-3">
             <button onClick={() => navigate(-1)} className="p-1.5 xs:p-2 -ml-0.5 rounded-lg hover:bg-gray-100 touch-target" aria-label={t('back')}>←</button>
@@ -302,7 +302,7 @@ export default function BibleBookViewer() {
   // 2. 책 내용 화면 (로딩 중)
   if (loading) {
     return (
-      <div className="min-h-screen min-h-[100dvh] flex items-center justify-center bg-white">
+      <div className="min-h-screen min-h-[100dvh] flex items-center justify-center bg-white overflow-x-hidden w-full max-w-full">
         <p className="text-[#5B6475] text-sm">{t('bibleLoading')}</p>
       </div>
     );
@@ -310,7 +310,7 @@ export default function BibleBookViewer() {
 
   // 3. 책 내용 + 검색
   return (
-    <div className="min-h-screen min-h-[100dvh] flex flex-col bg-white overflow-x-hidden">
+    <div className="min-h-screen min-h-[100dvh] flex flex-col bg-white overflow-x-hidden w-full max-w-full">
       <header className="sticky top-0 z-20 pt-[env(safe-area-inset-top)] pb-safe-bottom bg-white border-b border-[#E6EAF2]">
         <div className="flex items-center gap-1.5 xs:gap-2 min-390:gap-2.5 px-2 xs:px-3 min-390:px-4 py-2.5 min-375:py-3">
           <div className="flex items-center gap-0.5 shrink-0">

@@ -196,7 +196,7 @@ export default function BibleDaily() {
 
   if (!reading) {
     return (
-      <div className="min-h-screen bg-[#f8fafc] p-6 flex flex-col items-center justify-center">
+      <div className="min-h-screen min-h-[100dvh] bg-[#f8fafc] p-6 flex flex-col items-center justify-center overflow-x-hidden w-full max-w-full">
         <p className="text-[#64748b]">{t('noReading')}</p>
         <button
           onClick={() => setCurrentDay(1)}
