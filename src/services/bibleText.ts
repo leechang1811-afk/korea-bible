@@ -52,6 +52,33 @@ export async function loadBible(_version?: BibleVersion): Promise<BibleData> {
   return cache.kjv;
 }
 
+/** 점진적 로드: 먼저 첫 배치로 빠르게 표시, 나머지는 백그라운드 로드 */
+const INITIAL_BATCH = 5;
+export async function loadBibleProgressive(
+  onPartial: (data: BibleData) => void
+): Promise<BibleData> {
+  if (cache.kjv) {
+    onPartial(cache.kjv);
+    return cache.kjv;
+  }
+  const merged: BibleData = {};
+  const firstBatch = BOOK_IDS.slice(0, INITIAL_BATCH);
+  await Promise.all(firstBatch.map((id) => loadBookFromCache(id)));
+  for (const id of firstBatch) Object.assign(merged, bookCache[id] || {});
+  onPartial({ ...merged });
+  // 나머지 책들을 10권씩 순차 로드해 UI 블로킹 최소화
+  const rest = BOOK_IDS.slice(INITIAL_BATCH);
+  const CHUNK = 10;
+  for (let i = 0; i < rest.length; i += CHUNK) {
+    const chunk = rest.slice(i, i + CHUNK);
+    await Promise.all(chunk.map((id) => loadBookFromCache(id)));
+    for (const id of chunk) Object.assign(merged, bookCache[id] || {});
+    onPartial({ ...merged });
+  }
+  cache.kjv = merged;
+  return merged;
+}
+
 /** 한국어 설명 (본문과 별도, 저작권 없는 해설) - 번들에서 직접 로드 */
 export async function loadExplanations(): Promise<BibleData> {
   return explanationsData as BibleData;

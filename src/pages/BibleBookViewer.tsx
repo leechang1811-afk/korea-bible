@@ -1,9 +1,9 @@
-import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo, useDeferredValue, useTransition, memo } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { useBibleStore } from '../store/bibleStore';
 import { useTranslation } from '../hooks/useTranslation';
-import { loadBible, loadExplanations, getBookName, getVerseKey, type BibleVersion } from '../services/bibleText';
+import { loadBibleProgressive, loadExplanations, getBookName, getVerseKey, type BibleVersion } from '../services/bibleText';
 import { BIBLE_BOOKS_ORDER, CHAPTER_COUNTS } from '../data/bibleSchedule';
 
 function decodeHtmlEntities(text: string): string {
@@ -19,6 +19,76 @@ function decodeHtmlEntities(text: string): string {
 
 type VerseEntry = { bookId: string; chapter: number; verse: number; text: string; explanation?: string };
 
+type FlatItem =
+  | { type: 'book'; bookId: string; height: number }
+  | { type: 'chapter'; bookId: string; chNum: number; height: number }
+  | { type: 'verse'; bookId: string; chNum: number; verse: VerseEntry; key: string; height: number };
+
+const VirtualRow = memo(function VirtualRow(props: {
+  item: FlatItem;
+  virtualKey: string;
+  virtualIndex: number;
+  virtualStart: number;
+  version: 'ko' | 'en';
+  searchQuery: string;
+  showExplanation: boolean;
+  highlightedVerseKey: string | null;
+  measureRef: (el: Element | null) => void;
+  setBookRef: (bookId: string, el: HTMLElement | null) => void;
+  setVerseRef: (key: string, el: HTMLDivElement | null) => void;
+  getBookName: (id: string, v: 'ko' | 'en') => string;
+  t: (k: string) => string;
+  highlightText: (text: string, q: string) => React.ReactNode;
+}) {
+  const { item, virtualKey, virtualIndex, virtualStart, version, searchQuery, showExplanation, highlightedVerseKey, measureRef, setBookRef, setVerseRef, getBookName, t, highlightText } = props;
+  return (
+    <div data-index={virtualIndex} ref={measureRef} className="absolute left-0 w-full px-0" style={{ transform: `translateY(${virtualStart}px)` }}>
+      {item.type === 'book' && (
+        <h2 id={`book-${item.bookId}`} ref={(el) => setBookRef(item.bookId, el)} className="scroll-mt-20 text-base xs:text-lg min-390:text-xl sm:text-2xl font-bold text-[#1B64F2] mb-3 xs:mb-4 pb-2 border-b border-[#E6EAF2]">
+          {getBookName(item.bookId, version)}
+        </h2>
+      )}
+      {item.type === 'chapter' && (
+        <h3 className="text-xs xs:text-sm font-semibold text-[#5B6475] mb-1.5 xs:mb-2">{item.chNum}{t('bibleChapter')}</h3>
+      )}
+      {item.type === 'verse' && (
+        <div ref={(el) => setVerseRef(item.key, el)} data-verse-key={item.key} className={`flex flex-col gap-0.5 py-0.5 rounded transition-colors mb-1.5 ${highlightedVerseKey === item.key ? 'ring-2 ring-[#1B64F2] bg-blue-50' : ''}`}>
+          <div className="flex gap-1.5 xs:gap-2 min-390:gap-2">
+            <span className="shrink-0 text-[11px] xs:text-xs text-[#94a3b8] w-6 xs:w-7 min-390:w-8 sm:w-10">{item.verse.verse}</span>
+            <div className="flex-1 min-w-0 flex flex-col gap-0.5">
+              {version === 'ko' ? (
+                <>
+                  <span className="text-[13px] xs:text-sm min-390:text-base leading-relaxed font-semibold text-[#0B1220]">
+                    {searchQuery.trim() ? highlightText(item.verse.explanation ?? '', searchQuery) : item.verse.explanation ?? item.verse.text}
+                  </span>
+                  {showExplanation && item.verse.explanation && item.verse.text && (
+                    <div className="pl-2 border-l-2 border-[#E6EAF2] font-normal text-[#5B6475]">
+                      <span className="text-[11px] xs:text-xs text-[#94a3b8] font-medium">{t('englishKJVLabel')}</span>{' '}
+                      <span className="text-[12px] xs:text-sm">{searchQuery.trim() ? highlightText(item.verse.text, searchQuery) : item.verse.text}</span>
+                    </div>
+                  )}
+                </>
+              ) : (
+                <>
+                  <span className="text-[13px] xs:text-sm min-390:text-base leading-relaxed font-semibold text-[#0B1220]">
+                    {searchQuery.trim() ? highlightText(item.verse.text, searchQuery) : item.verse.text}
+                  </span>
+                  {showExplanation && item.verse.explanation && (
+                    <div className="pl-2 border-l-2 border-[#E6EAF2] font-normal text-[#5B6475]">
+                      <span className="text-[11px] xs:text-xs text-[#94a3b8] font-medium">{t('explanationLabel')}</span>{' '}
+                      <span className="text-[12px] xs:text-sm">{item.verse.explanation}</span>
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+});
+
 export default function BibleBookViewer() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -33,105 +103,94 @@ export default function BibleBookViewer() {
   const [loading, setLoading] = useState(true);
   const [tocOpen, setTocOpen] = useState(false); // 모바일에서 내용 우선
   const [searchQuery, setSearchQuery] = useState('');
+  const deferredSearchQuery = useDeferredValue(searchQuery);
   const [searchResults, setSearchResults] = useState<string[]>([]);
   const [currentMatchIndex, setCurrentMatchIndex] = useState(0);
   const [searchFocused, setSearchFocused] = useState(false);
   const [highlightedVerseKey, setHighlightedVerseKey] = useState<string | null>(null);
+  const [pendingScrollBookId, setPendingScrollBookId] = useState<string | null>(null);
+  const [, startTransition] = useTransition();
 
   const version: BibleVersion = bibleVersion;
 
   useEffect(() => {
-    Promise.all([loadBible(version), loadExplanations()]).then(([d, expl]) => {
-      setData(d);
+    let cancelled = false;
+    loadExplanations().then((expl) => {
+      if (cancelled) return;
       setExplanations(expl);
-      setLoading(false);
     });
+    loadBibleProgressive((d) => {
+      if (cancelled) return;
+      setData(d);
+      setLoading(false);
+    }).catch(() => {
+      if (!cancelled) setLoading(false);
+    });
+    return () => { cancelled = true; };
   }, [version]);
-
-  const verses = useMemo<VerseEntry[]>(() => {
-    const out: VerseEntry[] = [];
-    if (!data) return out;
-    for (const book of BIBLE_BOOKS_ORDER) {
-      const chapters = CHAPTER_COUNTS[book.id] ?? 0;
-      for (let ch = 1; ch <= chapters; ch++) {
-        for (let v = 1; v <= 200; v++) {
-          const key = getVerseKey(book.id, ch, v);
-          const raw = data[key];
-          if (!raw) break;
-          out.push({
-            bookId: book.id,
-            chapter: ch,
-            verse: v,
-            text: decodeHtmlEntities(raw.replace(/\s*!\s*$/, '')),
-            explanation: explanations[key]?.trim() || undefined,
-          });
-        }
-      }
-    }
-    return out;
-  }, [data, explanations]);
-
-  type FlatItem =
-    | { type: 'book'; bookId: string; height: number }
-    | { type: 'chapter'; bookId: string; chNum: number; height: number }
-    | { type: 'verse'; bookId: string; chNum: number; verse: VerseEntry; key: string; height: number };
 
   const { flatItems, verseKeyToIndex, bookIdToIndex } = useMemo(() => {
     const items: FlatItem[] = [];
     const verseMap = new Map<string, number>();
     const bookMap = new Map<string, number>();
-    const q = searchQuery.trim().toLowerCase();
+    if (!data) return { flatItems: items, verseKeyToIndex: verseMap, bookIdToIndex: bookMap };
+
+    const q = deferredSearchQuery.trim().toLowerCase();
     const isSearch = q.length > 0;
+    const searchKo = version === 'ko';
 
     for (const book of BIBLE_BOOKS_ORDER) {
-      const bookVerses = verses.filter((v) => v.bookId === book.id);
-      if (bookVerses.length === 0) continue;
+      const chapters = CHAPTER_COUNTS[book.id] ?? 0;
+      let bookHeaderAdded = false;
 
-      const chapters = new Map<number, VerseEntry[]>();
-      for (const v of bookVerses) {
-        const arr = chapters.get(v.chapter) ?? [];
-        arr.push(v);
-        chapters.set(v.chapter, arr);
-      }
-      const chEntries = [...chapters.entries()].sort((a, b) => a[0] - b[0]);
+      for (let ch = 1; ch <= chapters; ch++) {
+        const chVerses: VerseEntry[] = [];
+        for (let v = 1; v <= 200; v++) {
+          const key = getVerseKey(book.id, ch, v);
+          const raw = data[key];
+          if (!raw) break;
+          const text = decodeHtmlEntities(raw.replace(/\s*!\s*$/, ''));
+          const explanation = explanations[key]?.trim() || undefined;
+          const match = !isSearch || (searchKo ? text.toLowerCase().includes(q) || (explanation?.toLowerCase().includes(q) ?? false) : text.toLowerCase().includes(q));
+          if (match) chVerses.push({ bookId: book.id, chapter: ch, verse: v, text, explanation });
+        }
+        if (chVerses.length === 0) continue;
 
-      if (!isSearch) {
-        bookMap.set(book.id, items.length);
-        items.push({ type: 'book', bookId: book.id, height: 56 });
-      }
-
-      for (const [chNum, chVerses] of chEntries) {
-        const visibleVerses = isSearch ? chVerses.filter((v) => v.text.toLowerCase().includes(q)) : chVerses;
-        if (visibleVerses.length === 0) continue;
-
-        if (isSearch && !bookMap.has(book.id)) bookMap.set(book.id, items.length);
-        items.push({ type: 'chapter', bookId: book.id, chNum, height: 36 });
-        for (const v of visibleVerses) {
-          const key = getVerseKey(v.bookId, v.chapter, v.verse);
-          const h = showExplanation && v.explanation ? 78 : 52;
+        if (!bookHeaderAdded) {
+          bookMap.set(book.id, items.length);
+          items.push({ type: 'book', bookId: book.id, height: 56 });
+          bookHeaderAdded = true;
+        }
+        items.push({ type: 'chapter', bookId: book.id, chNum: ch, height: 36 });
+        for (const verse of chVerses) {
+          const key = getVerseKey(verse.bookId, verse.chapter, verse.verse);
+          const h = showExplanation && verse.explanation ? 78 : 52;
           verseMap.set(key, items.length);
-          items.push({ type: 'verse', bookId: book.id, chNum, verse: v, key, height: h });
+          items.push({ type: 'verse', bookId: book.id, chNum: ch, verse, key, height: h });
         }
       }
     }
     return { flatItems: items, verseKeyToIndex: verseMap, bookIdToIndex: bookMap };
-  }, [verses, searchQuery, showExplanation]);
+  }, [data, explanations, deferredSearchQuery, showExplanation, version]);
 
   const rowVirtualizer = useVirtualizer({
     count: flatItems.length,
     getScrollElement: () => scrollRef.current,
     estimateSize: (i) => flatItems[i]?.height ?? 52,
-    overscan: 12,
+    overscan: 20,
   });
 
   const runSearch = useCallback(() => {
-    if (!searchQuery.trim() || !data) {
-      setSearchResults([]);
-      setCurrentMatchIndex(0);
+    if (!deferredSearchQuery.trim() || !data) {
+      startTransition(() => {
+        setSearchResults([]);
+        setCurrentMatchIndex(0);
+      });
       return;
     }
-    const q = searchQuery.trim().toLowerCase();
+    const q = deferredSearchQuery.trim().toLowerCase();
     const keys: string[] = [];
+    const searchKorean = version === 'ko';
     for (const book of BIBLE_BOOKS_ORDER) {
       const chapters = CHAPTER_COUNTS[book.id] ?? 0;
       for (let ch = 1; ch <= chapters; ch++) {
@@ -139,17 +198,21 @@ export default function BibleBookViewer() {
           const key = getVerseKey(book.id, ch, v);
           const raw = data[key];
           if (!raw) break;
-          const text = decodeHtmlEntities(raw.replace(/\s*!\s*$/, '')).toLowerCase();
-          if (text.includes(q)) keys.push(key);
+          const textEn = decodeHtmlEntities(raw.replace(/\s*!\s*$/, '')).toLowerCase();
+          const textKo = (explanations[key] ?? '').trim().toLowerCase();
+          const match = textEn.includes(q) || (searchKorean && textKo.includes(q));
+          if (match) keys.push(key);
         }
       }
     }
-    setSearchResults(keys);
-    setCurrentMatchIndex(keys.length > 0 ? 0 : -1);
-  }, [searchQuery, data]);
+    startTransition(() => {
+      setSearchResults(keys);
+      setCurrentMatchIndex(keys.length > 0 ? 0 : -1);
+    });
+  }, [deferredSearchQuery, data, explanations, version]);
 
   useEffect(() => {
-    const timer = setTimeout(runSearch, 300);
+    const timer = setTimeout(runSearch, 400);
     return () => clearTimeout(timer);
   }, [runSearch]);
 
@@ -179,7 +242,13 @@ export default function BibleBookViewer() {
   const scrollToBook = useCallback((bookId: string) => {
     const idx = bookIdToIndex.get(bookId);
     if (idx !== undefined) {
-      rowVirtualizer.scrollToIndex(idx, { align: 'start', behavior: 'smooth' });
+      requestAnimationFrame(() => {
+        rowVirtualizer.scrollToIndex(idx, { align: 'start', behavior: 'smooth' });
+      });
+    } else {
+      // 검색 모드에서 해당 책에 결과 없음 → 검색 초기화 후 해당 책으로 이동
+      setSearchQuery('');
+      setPendingScrollBookId(bookId);
     }
   }, [bookIdToIndex, rowVirtualizer]);
 
@@ -188,12 +257,29 @@ export default function BibleBookViewer() {
     if (book && data && flatItems.length > 0) {
       const idx = bookIdToIndex.get(book);
       if (idx != null) {
-        setTimeout(() => rowVirtualizer.scrollToIndex(idx, { align: 'start', behavior: 'smooth' }), 100);
+        requestAnimationFrame(() => {
+          rowVirtualizer.scrollToIndex(idx, { align: 'start', behavior: 'smooth' });
+        });
       }
     }
   }, [searchParams.get('book'), data, flatItems.length, bookIdToIndex, rowVirtualizer]);
 
-  const highlightText = (text: string, query: string): React.ReactNode => {
+  useEffect(() => {
+    if (pendingScrollBookId && flatItems.length > 0) {
+      const idx = bookIdToIndex.get(pendingScrollBookId);
+      if (idx !== undefined) {
+        requestAnimationFrame(() => {
+          rowVirtualizer.scrollToIndex(idx, { align: 'start', behavior: 'smooth' });
+        });
+        setPendingScrollBookId(null);
+      }
+    }
+  }, [pendingScrollBookId, flatItems.length, bookIdToIndex, rowVirtualizer]);
+
+  function escapeRegex(s: string) {
+    return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  }
+  const highlightText = useCallback((text: string, query: string): React.ReactNode => {
     if (!query.trim()) return text;
     const q = query.trim();
     const parts = text.split(new RegExp(`(${escapeRegex(q)})`, 'gi'));
@@ -206,11 +292,7 @@ export default function BibleBookViewer() {
         p
       )
     );
-  };
-
-  function escapeRegex(s: string) {
-    return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  }
+  }, []);
 
   if (loading) {
     return (
@@ -360,77 +442,23 @@ export default function BibleBookViewer() {
               const item = flatItems[virtualRow.index];
               if (!item) return null;
               return (
-                <div
-                  key={virtualRow.key}
-                  data-index={virtualRow.index}
-                  ref={rowVirtualizer.measureElement}
-                  className="absolute left-0 w-full px-0"
-                  style={{ transform: `translateY(${virtualRow.start}px)` }}
-                >
-                  {item.type === 'book' && (
-                    <h2
-                      id={`book-${item.bookId}`}
-                      ref={(el) => { if (el) bookSectionRefs.current.set(item.bookId, el); }}
-                      className="scroll-mt-20 text-base xs:text-lg min-390:text-xl sm:text-2xl font-bold text-[#1B64F2] mb-3 xs:mb-4 pb-2 border-b border-[#E6EAF2]"
-                    >
-                      {getBookName(item.bookId, version)}
-                    </h2>
-                  )}
-                  {item.type === 'chapter' && (
-                    <h3 className="text-xs xs:text-sm font-semibold text-[#5B6475] mb-1.5 xs:mb-2">
-                      {item.chNum}{t('bibleChapter')}
-                    </h3>
-                  )}
-                  {item.type === 'verse' && (
-                    <div
-                      ref={(el) => { if (el) verseRefs.current.set(item.key, el); }}
-                      data-verse-key={item.key}
-                      className={`flex flex-col gap-0.5 py-0.5 rounded transition-colors mb-1.5 ${highlightedVerseKey === item.key ? 'ring-2 ring-[#1B64F2] bg-blue-50' : ''}`}
-                    >
-                      {/* 한국어 모드: 한국어(메인) 먼저, 영어(보조) 나중 | 영어 모드: 영어(메인) 먼저, 한국어(보조) 나중 */}
-                      <div className="flex gap-1.5 xs:gap-2 min-390:gap-2">
-                        <span className="shrink-0 text-[11px] xs:text-xs text-[#94a3b8] w-6 xs:w-7 min-390:w-8 sm:w-10">
-                          {item.verse.verse}
-                        </span>
-                        <div className="flex-1 min-w-0 flex flex-col gap-0.5">
-                          {version === 'ko' ? (
-                            <>
-                              <span className={`text-[13px] xs:text-sm min-390:text-base leading-relaxed font-semibold text-[#0B1220]`}>
-                                {searchQuery.trim()
-                                  ? highlightText(item.verse.explanation ?? '', searchQuery)
-                                  : item.verse.explanation ?? item.verse.text}
-                              </span>
-                              {showExplanation && item.verse.explanation && item.verse.text && (
-                                <div className="pl-2 border-l-2 border-[#E6EAF2] font-normal text-[#5B6475]">
-                                  <span className="text-[11px] xs:text-xs text-[#94a3b8] font-medium">{t('englishKJVLabel')}</span>{' '}
-                                  <span className="text-[12px] xs:text-sm">
-                                    {searchQuery.trim()
-                                      ? highlightText(item.verse.text, searchQuery)
-                                      : item.verse.text}
-                                  </span>
-                                </div>
-                              )}
-                            </>
-                          ) : (
-                            <>
-                              <span className={`text-[13px] xs:text-sm min-390:text-base leading-relaxed font-semibold text-[#0B1220]`}>
-                                {searchQuery.trim()
-                                  ? highlightText(item.verse.text, searchQuery)
-                                  : item.verse.text}
-                              </span>
-                              {showExplanation && item.verse.explanation && (
-                                <div className="pl-2 border-l-2 border-[#E6EAF2] font-normal text-[#5B6475]">
-                                  <span className="text-[11px] xs:text-xs text-[#94a3b8] font-medium">{t('explanationLabel')}</span>{' '}
-                                  <span className="text-[12px] xs:text-sm">{item.verse.explanation}</span>
-                                </div>
-                              )}
-                            </>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                </div>
+                <VirtualRow
+                  key={String(virtualRow.key)}
+                  item={item}
+                  virtualKey={String(virtualRow.key)}
+                  virtualIndex={virtualRow.index}
+                  virtualStart={virtualRow.start}
+                  version={version}
+                  searchQuery={deferredSearchQuery}
+                  showExplanation={showExplanation}
+                  highlightedVerseKey={highlightedVerseKey}
+                  measureRef={rowVirtualizer.measureElement}
+                  setBookRef={(bookId, el) => { if (el) bookSectionRefs.current.set(bookId, el); }}
+                  setVerseRef={(key, el) => { if (el) verseRefs.current.set(key, el); }}
+                  getBookName={getBookName}
+                  t={t}
+                  highlightText={highlightText}
+                />
               );
             })}
           </div>
