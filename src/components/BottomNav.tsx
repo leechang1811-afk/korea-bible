@@ -7,8 +7,11 @@ export function BottomNav() {
   const location = useLocation();
   const { t } = useTranslation();
   const isActive = (path: string) => location.pathname === path;
-  // 성능 민감/집중 화면에서는 배너 비노출
-  const shouldShowBanner = location.pathname !== '/read' && location.pathname !== '/bible';
+  // 홈/성능 민감 화면에서는 배너 비노출
+  const shouldShowBanner =
+    location.pathname !== '/' &&
+    location.pathname !== '/read' &&
+    location.pathname !== '/bible';
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-[#E6EAF2] z-50">
