@@ -12,6 +12,11 @@ export function BottomNav() {
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-[#E6EAF2] z-50">
+      {shouldShowBanner && (
+        <div className="border-b border-[#E6EAF2] px-2 xs:px-3 pt-2">
+          <BannerAd />
+        </div>
+      )}
       <div className="flex justify-around py-2.5 xs:py-3 px-3 xs:px-4 pl-[max(0.75rem,env(safe-area-inset-left))] pr-[max(0.75rem,env(safe-area-inset-right))]">
         <button
           onClick={() => navigate('/')}
@@ -44,12 +49,7 @@ export function BottomNav() {
           <span>⚙️</span> {t('settings')}
         </button>
       </div>
-      {shouldShowBanner && (
-        <div className="border-t border-[#E6EAF2] px-2 xs:px-3 pb-[max(0.5rem,env(safe-area-inset-bottom))]">
-          <BannerAd />
-        </div>
-      )}
-      {!shouldShowBanner && <div className="h-[max(0.5rem,env(safe-area-inset-bottom))]" />}
+      <div className="h-[max(0.5rem,env(safe-area-inset-bottom))]" />
     </nav>
   );
 }
