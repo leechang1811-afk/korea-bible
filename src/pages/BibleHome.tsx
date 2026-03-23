@@ -44,7 +44,7 @@ export default function BibleHome() {
         </div>
       </header>
 
-      <div className="flex-1 flex flex-col items-center justify-center px-2 xs:px-3 min-375:px-4 sm:px-6 py-3 xs:py-4 min-390:py-5 sm:py-8 pb-24 xs:pb-28 overflow-x-hidden w-full box-border">
+      <div className="flex-1 flex flex-col items-center justify-center px-2 xs:px-3 min-375:px-4 sm:px-6 py-3 xs:py-4 min-390:py-5 sm:py-8 pb-[max(11.5rem,calc(env(safe-area-inset-bottom)+11rem))] overflow-x-hidden w-full box-border">
         <div className="w-full max-w-md rounded-xl xs:rounded-2xl min-390:rounded-3xl p-3 xs:p-5 min-390:p-6 sm:p-8 pb-6 xs:pb-8 min-390:pb-10 sm:pb-12 bg-[#EEF4FF] border border-[#E6EAF2] mx-2 xs:mx-3 min-375:mx-4">
           <div className="flex flex-col items-center pb-3 xs:pb-5 min-390:pb-6">
             <div className="relative w-10 h-12 mb-4" role="img" aria-label="십자가">

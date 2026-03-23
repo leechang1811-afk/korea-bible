@@ -56,7 +56,7 @@ export default function BibleJournal() {
   );
 
   return (
-    <div className="min-h-screen min-h-[100dvh] bg-[#f8fafc] pb-24 xs:pb-28 overflow-x-hidden w-full max-w-full">
+    <div className="min-h-screen min-h-[100dvh] bg-[#f8fafc] pb-[max(11.5rem,calc(env(safe-area-inset-bottom)+11rem))] overflow-x-hidden w-full max-w-full">
       <header className="sticky top-0 z-10 bg-white border-b border-[#E6EAF2] shadow-sm pt-[max(0.5rem,env(safe-area-inset-top))]">
         <div className="flex items-center justify-between px-3 xs:px-4 py-2.5 xs:py-3">
           <button

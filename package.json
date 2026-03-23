@@ -12,7 +12,9 @@
     "translate-kjv": "node scripts/translate-kjv-to-korean.mjs",
     "extract-remaining-ot": "node scripts/extract-remaining-ot-from-krv.mjs",
     "generate-translations": "node scripts/generate-all-translations.mjs",
-    "split-kjv": "node scripts/split-kjv-by-book.mjs"
+    "split-kjv": "node scripts/split-kjv-by-book.mjs",
+    "ait:build": "ait build",
+    "ait:dev": "ait dev"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.99.2",
@@ -25,6 +27,7 @@
     "zustand": "^4.5.7"
   },
   "devDependencies": {
+    "@apps-in-toss/web-framework": "^2.0.9",
     "@types/react": "^18.2.45",
     "@types/react-dom": "^18.2.18",
     "@vitejs/plugin-react": "^4.2.1",
