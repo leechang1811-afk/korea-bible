@@ -43,13 +43,31 @@ export default function BibleHome() {
           <div className="flex-1 min-w-0">
             <AuthBanner />
           </div>
-          <button
-            onClick={() => navigate('/settings')}
-            className="shrink-0 p-2 text-[#5B6475] hover:text-[#1B64F2]"
-            aria-label={t('settings')}
-          >
-            ⚙️
-          </button>
+          <div className="shrink-0 flex items-center gap-1.5 pr-1">
+            <div className="flex rounded-lg overflow-hidden border border-[#E6EAF2] bg-white">
+              <button
+                onClick={() => setBibleVersion('ko')}
+                className={`min-h-[36px] px-2 xs:px-2.5 py-1 rounded-lg text-[10px] xs:text-xs font-medium ${bibleVersion === 'ko' ? 'bg-[#1B64F2] text-white' : 'bg-white/80 text-[#5B6475]'}`}
+                aria-label={t('korean')}
+              >
+                한
+              </button>
+              <button
+                onClick={() => setBibleVersion('en')}
+                className={`min-h-[36px] px-2 xs:px-2.5 py-1 rounded-lg text-[10px] xs:text-xs font-medium ${bibleVersion === 'en' ? 'bg-[#1B64F2] text-white' : 'bg-white/80 text-[#5B6475]'}`}
+                aria-label={t('english')}
+              >
+                EN
+              </button>
+            </div>
+            <button
+              onClick={() => navigate('/settings')}
+              className="p-2 text-[#5B6475] hover:text-[#1B64F2]"
+              aria-label={t('settings')}
+            >
+              ⚙️
+            </button>
+          </div>
         </div>
       </header>
 
@@ -66,20 +84,7 @@ export default function BibleHome() {
             <p className="text-[#5B6475] text-xs xs:text-sm font-medium text-center px-2">{t('homeTagline')}</p>
             <h1 className="text-[#1B64F2] text-lg xs:text-xl sm:text-2xl font-bold mt-2 text-center">{t('appTitle')}</h1>
             <span className="mt-2 px-3 py-1 rounded-full text-xs font-medium text-[#1B64F2] bg-white">{t('homeChronological')}</span>
-            <div className="flex gap-1.5 xs:gap-2 mt-3">
-              <button
-                onClick={() => setBibleVersion('ko')}
-                className={`min-h-[36px] px-2 xs:px-2.5 py-1 rounded-lg text-[10px] xs:text-xs font-medium ${bibleVersion === 'ko' ? 'bg-[#1B64F2] text-white' : 'bg-white/80 text-[#5B6475]'}`}
-              >
-                한
-              </button>
-              <button
-                onClick={() => setBibleVersion('en')}
-                className={`min-h-[36px] px-2 xs:px-2.5 py-1 rounded-lg text-[10px] xs:text-xs font-medium ${bibleVersion === 'en' ? 'bg-[#1B64F2] text-white' : 'bg-white/80 text-[#5B6475]'}`}
-              >
-                EN
-              </button>
-            </div>
+            <span className="mt-1 block text-[#94a3b8] text-[10px] xs:text-xs text-center">{t('homeSourceKJV')}</span>
           </div>
           <div className="space-y-2 xs:space-y-3">
             <button
@@ -139,8 +144,6 @@ export default function BibleHome() {
             {t('homeDonationLine1')}
             <br />
             {t('homeDonationLine2')}
-            <br />
-            <span className="mt-2 block">{t('homeSourceKJV')}</span>
           </p>
         </div>
       </div>

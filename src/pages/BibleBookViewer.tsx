@@ -347,7 +347,7 @@ export default function BibleBookViewer() {
               <button
                 key={book.id}
                 onClick={() => selectBook(book.id)}
-                className="min-h-[48px] xs:min-h-[52px] px-3 py-2.5 rounded-xl text-left text-[13px] xs:text-sm font-medium text-[#0B1220] bg-[#F8FAFC] hover:bg-[#EEF4FF] active:bg-[#E6EAF2] border border-[#E6EAF2] touch-target"
+                className="min-h-[48px] xs:min-h-[52px] px-3 py-2.5 rounded-xl text-center text-[13px] xs:text-sm font-medium text-[#0B1220] bg-[#F8FAFC] hover:bg-[#EEF4FF] active:bg-[#E6EAF2] border border-[#E6EAF2] touch-target"
               >
                 {getBookName(book.id, version)}
               </button>
