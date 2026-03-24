@@ -390,7 +390,12 @@ export default function BibleBookViewer() {
             <button onClick={goToPicker} className="min-h-[44px] px-2 xs:px-2.5 py-1.5 text-[11px] xs:text-xs font-medium rounded-lg border border-[#E6EAF2] bg-white text-[#5B6475] hover:bg-[#f1f5f9] whitespace-nowrap">{t('selectOtherBook')}</button>
           </div>
         </div>
-        <div className="px-2 xs:px-3 min-390:px-4 pb-2 min-375:pb-3 bg-white">
+      </header>
+      <main
+        ref={scrollRef}
+        className="flex-1 min-h-0 overflow-y-auto px-2 xs:px-3 min-375:px-4 min-428:px-5 sm:px-6 py-3 xs:py-4 min-390:py-5 sm:py-6 pb-[max(1.5rem,env(safe-area-inset-bottom))]"
+      >
+        <div className="sticky top-0 z-30 bg-white pb-2 min-375:pb-3">
           <div className="relative flex items-center gap-1.5 xs:gap-2">
             <input
               type="text"
@@ -408,11 +413,6 @@ export default function BibleBookViewer() {
             )}
           </div>
         </div>
-      </header>
-      <main
-        ref={scrollRef}
-        className="flex-1 min-h-0 overflow-y-auto px-2 xs:px-3 min-375:px-4 min-428:px-5 sm:px-6 py-3 xs:py-4 min-390:py-5 sm:py-6 pb-[max(1.5rem,env(safe-area-inset-bottom))]"
-      >
         <div className="max-w-2xl mx-auto" style={{ height: `${rowVirtualizer.getTotalSize() + 24}px`, position: 'relative', width: '100%', paddingTop: 12, paddingBottom: 12 }}>
           {rowVirtualizer.getVirtualItems().map((virtualRow) => {
             const item = flatItems[virtualRow.index];
