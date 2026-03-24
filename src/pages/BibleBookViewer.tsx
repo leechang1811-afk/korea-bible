@@ -285,22 +285,30 @@ export default function BibleBookViewer() {
     setSearchQuery('');
   }, [setSearchParams]);
 
-  useEffect(() => {
-    const el = scrollRef.current;
-    if (!el) return;
-    const onScroll = () => {
-      setShowScrollTop(el.scrollTop > 400);
-    };
-    onScroll();
-    el.addEventListener('scroll', onScroll, { passive: true });
-    return () => el.removeEventListener('scroll', onScroll);
-  }, [selectedBookId]);
-
   const scrollToTop = useCallback(() => {
     const el = scrollRef.current;
-    if (!el) return;
-    el.scrollTo({ top: 0, behavior: 'smooth' });
+    // 기기별 스크롤 컨테이너 차이(main/window) 모두 대응
+    if (el) el.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }, []);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const mainTop = scrollRef.current?.scrollTop ?? 0;
+      const winTop = window.scrollY || document.documentElement.scrollTop || 0;
+      setShowScrollTop(Math.max(mainTop, winTop) > 320);
+    };
+
+    const mainEl = scrollRef.current;
+    mainEl?.addEventListener('scroll', handleScroll, { passive: true });
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    handleScroll();
+
+    return () => {
+      mainEl?.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, [selectedBookId]);
 
   function escapeRegex(s: string) {
     return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -401,7 +409,10 @@ export default function BibleBookViewer() {
           </div>
         </div>
       </header>
-      <main ref={scrollRef} className="flex-1 overflow-y-auto px-2 xs:px-3 min-375:px-4 min-428:px-5 sm:px-6 py-3 xs:py-4 min-390:py-5 sm:py-6 pb-[max(1.5rem,env(safe-area-inset-bottom))]">
+      <main
+        ref={scrollRef}
+        className="flex-1 overflow-y-auto px-2 xs:px-3 min-375:px-4 min-428:px-5 sm:px-6 py-3 xs:py-4 min-390:py-5 sm:py-6 pb-[max(1.5rem,env(safe-area-inset-bottom))]"
+      >
         <div className="max-w-2xl mx-auto" style={{ height: `${rowVirtualizer.getTotalSize() + 24}px`, position: 'relative', width: '100%', paddingTop: 12, paddingBottom: 12 }}>
           {rowVirtualizer.getVirtualItems().map((virtualRow) => {
             const item = flatItems[virtualRow.index];
@@ -429,7 +440,7 @@ export default function BibleBookViewer() {
       {showScrollTop && (
         <button
           onClick={scrollToTop}
-          className="fixed right-4 xs:right-5 bottom-[max(6.5rem,calc(env(safe-area-inset-bottom)+6rem))] z-40 w-11 h-11 rounded-full bg-[#1B64F2] text-white shadow-lg hover:bg-[#1557e0] active:opacity-90 touch-target"
+          className="fixed right-4 xs:right-5 bottom-[max(5rem,calc(env(safe-area-inset-bottom)+4.5rem))] z-40 w-11 h-11 rounded-full bg-[#1B64F2] text-white shadow-lg hover:bg-[#1557e0] active:opacity-90 touch-target"
           aria-label="맨 위로"
           title="맨 위로"
         >
