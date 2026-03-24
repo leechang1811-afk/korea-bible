@@ -107,7 +107,6 @@ export default function BibleBookViewer() {
   const [searchResults, setSearchResults] = useState<string[]>([]);
   const [currentMatchIndex, setCurrentMatchIndex] = useState(0);
   const [highlightedVerseKey, setHighlightedVerseKey] = useState<string | null>(null);
-  const [showScrollTop, setShowScrollTop] = useState(false);
   const [, startTransition] = useTransition();
 
   const version: BibleVersion = bibleVersion;
@@ -292,24 +291,6 @@ export default function BibleBookViewer() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, []);
 
-  useEffect(() => {
-    const handleScroll = () => {
-      const mainTop = scrollRef.current?.scrollTop ?? 0;
-      const winTop = window.scrollY || document.documentElement.scrollTop || 0;
-      setShowScrollTop(Math.max(mainTop, winTop) > 120);
-    };
-
-    const mainEl = scrollRef.current;
-    mainEl?.addEventListener('scroll', handleScroll, { passive: true });
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    handleScroll();
-
-    return () => {
-      mainEl?.removeEventListener('scroll', handleScroll);
-      window.removeEventListener('scroll', handleScroll);
-    };
-  }, [selectedBookId]);
-
   function escapeRegex(s: string) {
     return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   }
@@ -437,16 +418,14 @@ export default function BibleBookViewer() {
           })}
         </div>
       </main>
-      {showScrollTop && (
-        <button
-          onClick={scrollToTop}
-          className="fixed right-4 xs:right-5 bottom-[max(5rem,calc(env(safe-area-inset-bottom)+4.5rem))] z-40 w-11 h-11 rounded-full bg-[#1B64F2] text-white shadow-lg hover:bg-[#1557e0] active:opacity-90 touch-target"
-          aria-label="맨 위로"
-          title="맨 위로"
-        >
-          ↑
-        </button>
-      )}
+      <button
+        onClick={scrollToTop}
+        className="fixed right-4 xs:right-5 bottom-[max(5rem,calc(env(safe-area-inset-bottom)+4.5rem))] z-40 w-11 h-11 rounded-full bg-[#1B64F2] text-white shadow-lg hover:bg-[#1557e0] active:opacity-90 touch-target"
+        aria-label="맨 위로"
+        title="맨 위로"
+      >
+        ↑
+      </button>
     </div>
   );
 }
