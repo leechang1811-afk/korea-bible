@@ -27,8 +27,11 @@ export default function BibleJournal() {
         items: d.items.filter((x) => !isMemo(x)),
       })).filter((d) => d.items.length > 0);
     }
-    // 기본 탭(메모): 메모 + 찜 함께 노출
-    return data;
+    // 기본 탭(메모): 메모만 노출
+    return data.map((d) => ({
+      ...d,
+      items: d.items.filter((x) => isMemo(x)),
+    })).filter((d) => d.items.length > 0);
   }, [getMemosByDate, memos, bookmarks, tab]);
 
   const byDate = useMemo(() => {
@@ -49,7 +52,7 @@ export default function BibleJournal() {
   const searchResults = useMemo(() => {
     if (!search.trim()) return [];
     const all = searchMemos(search);
-    return tab === 'bookmarks' ? all.filter((x) => !isMemo(x)) : all;
+    return tab === 'bookmarks' ? all.filter((x) => !isMemo(x)) : all.filter((x) => isMemo(x));
   }, [search, searchMemos, memos, bookmarks, tab]);
 
   const verseSearchResults = useMemo(
