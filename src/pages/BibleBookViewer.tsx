@@ -107,6 +107,7 @@ export default function BibleBookViewer() {
   const [searchResults, setSearchResults] = useState<string[]>([]);
   const [currentMatchIndex, setCurrentMatchIndex] = useState(0);
   const [highlightedVerseKey, setHighlightedVerseKey] = useState<string | null>(null);
+  const [showScrollTop, setShowScrollTop] = useState(false);
   const [, startTransition] = useTransition();
 
   const version: BibleVersion = bibleVersion;
@@ -284,6 +285,23 @@ export default function BibleBookViewer() {
     setSearchQuery('');
   }, [setSearchParams]);
 
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const onScroll = () => {
+      setShowScrollTop(el.scrollTop > 400);
+    };
+    onScroll();
+    el.addEventListener('scroll', onScroll, { passive: true });
+    return () => el.removeEventListener('scroll', onScroll);
+  }, [selectedBookId]);
+
+  const scrollToTop = useCallback(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    el.scrollTo({ top: 0, behavior: 'smooth' });
+  }, []);
+
   function escapeRegex(s: string) {
     return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   }
@@ -364,7 +382,7 @@ export default function BibleBookViewer() {
             <button onClick={goToPicker} className="min-h-[44px] px-2 xs:px-2.5 py-1.5 text-[11px] xs:text-xs font-medium rounded-lg border border-[#E6EAF2] bg-white text-[#5B6475] hover:bg-[#f1f5f9] whitespace-nowrap">{t('selectOtherBook')}</button>
           </div>
         </div>
-        <div className="px-2 xs:px-3 min-390:px-4 pb-2 min-375:pb-3">
+        <div className="px-2 xs:px-3 min-390:px-4 pb-2 min-375:pb-3 bg-white">
           <div className="relative flex items-center gap-1.5 xs:gap-2">
             <input
               type="text"
@@ -408,6 +426,16 @@ export default function BibleBookViewer() {
           })}
         </div>
       </main>
+      {showScrollTop && (
+        <button
+          onClick={scrollToTop}
+          className="fixed right-4 xs:right-5 bottom-[max(6.5rem,calc(env(safe-area-inset-bottom)+6rem))] z-40 w-11 h-11 rounded-full bg-[#1B64F2] text-white shadow-lg hover:bg-[#1557e0] active:opacity-90 touch-target"
+          aria-label="맨 위로"
+          title="맨 위로"
+        >
+          ↑
+        </button>
+      )}
     </div>
   );
 }
