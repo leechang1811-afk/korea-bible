@@ -173,6 +173,16 @@ export default function BibleBookViewer() {
     return out;
   }, [data, selectedBookId, explanations]);
 
+  const versesByChapter = useMemo(() => {
+    const map = new Map<number, VerseEntry[]>();
+    for (const verse of bookVerses) {
+      const arr = map.get(verse.chapter);
+      if (arr) arr.push(verse);
+      else map.set(verse.chapter, [verse]);
+    }
+    return map;
+  }, [bookVerses]);
+
   const { flatItems, verseKeyToIndex } = useMemo(() => {
     const items: FlatItem[] = [];
     const verseMap = new Map<string, number>();
@@ -185,8 +195,8 @@ export default function BibleBookViewer() {
     const chapters = CHAPTER_COUNTS[selectedBookId] ?? 0;
 
     for (let ch = 1; ch <= chapters; ch++) {
-      const chVerses = bookVerses.filter((v) => {
-        if (v.chapter !== ch) return false;
+      const baseVerses = versesByChapter.get(ch) ?? [];
+      const chVerses = baseVerses.filter((v) => {
         if (!isSearch) return true;
         if (chapterQuery !== null) return v.chapter === chapterQuery;
         const textMatch = v.text.toLowerCase().includes(q);
@@ -204,7 +214,7 @@ export default function BibleBookViewer() {
       }
     }
     return { flatItems: items, verseKeyToIndex: verseMap };
-  }, [bookVerses, selectedBookId, deferredSearchQuery, showExplanation, version]);
+  }, [selectedBookId, deferredSearchQuery, showExplanation, version, versesByChapter, bookVerses.length]);
 
   const rowVirtualizer = useVirtualizer({
     count: flatItems.length,
@@ -225,12 +235,19 @@ export default function BibleBookViewer() {
     const chapterQuery = parseChapterFromQuery(deferredSearchQuery);
     const keys: string[] = [];
     const searchKorean = version === 'ko';
+    if (chapterQuery !== null) {
+      const chapterVerses = versesByChapter.get(chapterQuery) ?? [];
+      for (const verse of chapterVerses) {
+        keys.push(getVerseKey(verse.bookId, verse.chapter, verse.verse));
+      }
+      startTransition(() => {
+        setSearchResults(keys);
+        setCurrentMatchIndex(keys.length > 0 ? 0 : -1);
+      });
+      return;
+    }
     for (const verse of bookVerses) {
       const key = getVerseKey(verse.bookId, verse.chapter, verse.verse);
-      if (chapterQuery !== null) {
-        if (verse.chapter === chapterQuery) keys.push(key);
-        continue;
-      }
       const textEn = verse.text.toLowerCase();
       const textKo = (verse.explanation ?? '').toLowerCase();
       const match = textEn.includes(q) || (searchKorean && textKo.includes(q));
@@ -240,7 +257,7 @@ export default function BibleBookViewer() {
       setSearchResults(keys);
       setCurrentMatchIndex(keys.length > 0 ? 0 : -1);
     });
-  }, [deferredSearchQuery, selectedBookId, version, bookVerses]);
+  }, [deferredSearchQuery, selectedBookId, version, bookVerses, versesByChapter]);
 
   useEffect(() => {
     const timer = setTimeout(runSearch, 400);
