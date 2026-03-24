@@ -17,6 +17,15 @@ function decodeHtmlEntities(text: string): string {
     .replace(/&gt;/g, '>');
 }
 
+function parseChapterFromQuery(query: string): number | null {
+  const q = query.trim().toLowerCase();
+  if (!q) return null;
+  const m = q.match(/^(\d{1,3})\s*(장|chapter|ch\.?)?$/i);
+  if (!m) return null;
+  const n = Number(m[1]);
+  return Number.isFinite(n) && n > 0 ? n : null;
+}
+
 type VerseEntry = { bookId: string; chapter: number; verse: number; text: string; explanation?: string };
 
 type FlatItem =
@@ -114,14 +123,20 @@ export default function BibleBookViewer() {
     }
   }, [searchParams]);
 
+  const shouldLoadExplanations = useMemo(() => {
+    const hasKoreanQuery = /[ㄱ-ㅎㅏ-ㅣ가-힣]/.test(deferredSearchQuery);
+    return version === 'ko' || showExplanation || hasKoreanQuery;
+  }, [version, showExplanation, deferredSearchQuery]);
+
   useEffect(() => {
+    if (!shouldLoadExplanations || Object.keys(explanations).length > 0) return;
     let cancelled = false;
     loadExplanations().then((expl) => {
       if (cancelled) return;
       setExplanations(expl);
     });
     return () => { cancelled = true; };
-  }, []);
+  }, [shouldLoadExplanations, explanations]);
 
   useEffect(() => {
     if (!selectedBookId) return;
@@ -137,27 +152,47 @@ export default function BibleBookViewer() {
     return () => { cancelled = true; };
   }, [selectedBookId]);
 
-  const { flatItems, verseKeyToIndex } = useMemo(() => {
-    const items: FlatItem[] = [];
-    const verseMap = new Map<string, number>();
-    if (!data || !selectedBookId) return { flatItems: items, verseKeyToIndex: verseMap };
-
-    const q = deferredSearchQuery.trim().toLowerCase();
-    const isSearch = q.length > 0;
-    const searchKo = version === 'ko';
+  const bookVerses = useMemo<VerseEntry[]>(() => {
+    if (!data || !selectedBookId) return [];
+    const out: VerseEntry[] = [];
     const chapters = CHAPTER_COUNTS[selectedBookId] ?? 0;
-
     for (let ch = 1; ch <= chapters; ch++) {
-      const chVerses: VerseEntry[] = [];
       for (let v = 1; v <= 200; v++) {
         const key = getVerseKey(selectedBookId, ch, v);
         const raw = data[key];
         if (!raw) break;
-        const text = decodeHtmlEntities(raw.replace(/\s*!\s*$/, ''));
-        const explanation = explanations[key]?.trim() || undefined;
-        const match = !isSearch || (searchKo ? text.toLowerCase().includes(q) || (explanation?.toLowerCase().includes(q) ?? false) : text.toLowerCase().includes(q));
-        if (match) chVerses.push({ bookId: selectedBookId, chapter: ch, verse: v, text, explanation });
+        out.push({
+          bookId: selectedBookId,
+          chapter: ch,
+          verse: v,
+          text: decodeHtmlEntities(raw.replace(/\s*!\s*$/, '')),
+          explanation: explanations[key]?.trim() || undefined,
+        });
       }
+    }
+    return out;
+  }, [data, selectedBookId, explanations]);
+
+  const { flatItems, verseKeyToIndex } = useMemo(() => {
+    const items: FlatItem[] = [];
+    const verseMap = new Map<string, number>();
+    if (!selectedBookId || bookVerses.length === 0) return { flatItems: items, verseKeyToIndex: verseMap };
+
+    const q = deferredSearchQuery.trim().toLowerCase();
+    const isSearch = q.length > 0;
+    const chapterQuery = parseChapterFromQuery(deferredSearchQuery);
+    const searchKo = version === 'ko';
+    const chapters = CHAPTER_COUNTS[selectedBookId] ?? 0;
+
+    for (let ch = 1; ch <= chapters; ch++) {
+      const chVerses = bookVerses.filter((v) => {
+        if (v.chapter !== ch) return false;
+        if (!isSearch) return true;
+        if (chapterQuery !== null) return v.chapter === chapterQuery;
+        const textMatch = v.text.toLowerCase().includes(q);
+        const koMatch = (v.explanation ?? '').toLowerCase().includes(q);
+        return searchKo ? textMatch || koMatch : textMatch;
+      });
       if (chVerses.length === 0) continue;
 
       items.push({ type: 'chapter', bookId: selectedBookId, chNum: ch, height: 36 });
@@ -169,7 +204,7 @@ export default function BibleBookViewer() {
       }
     }
     return { flatItems: items, verseKeyToIndex: verseMap };
-  }, [data, explanations, selectedBookId, deferredSearchQuery, showExplanation, version]);
+  }, [bookVerses, selectedBookId, deferredSearchQuery, showExplanation, version]);
 
   const rowVirtualizer = useVirtualizer({
     count: flatItems.length,
@@ -179,7 +214,7 @@ export default function BibleBookViewer() {
   });
 
   const runSearch = useCallback(() => {
-    if (!deferredSearchQuery.trim() || !data || !selectedBookId) {
+    if (!deferredSearchQuery.trim() || !selectedBookId) {
       startTransition(() => {
         setSearchResults([]);
         setCurrentMatchIndex(0);
@@ -187,25 +222,25 @@ export default function BibleBookViewer() {
       return;
     }
     const q = deferredSearchQuery.trim().toLowerCase();
+    const chapterQuery = parseChapterFromQuery(deferredSearchQuery);
     const keys: string[] = [];
     const searchKorean = version === 'ko';
-    const chapters = CHAPTER_COUNTS[selectedBookId] ?? 0;
-    for (let ch = 1; ch <= chapters; ch++) {
-      for (let v = 1; v <= 200; v++) {
-        const key = getVerseKey(selectedBookId, ch, v);
-        const raw = data[key];
-        if (!raw) break;
-        const textEn = decodeHtmlEntities(raw.replace(/\s*!\s*$/, '')).toLowerCase();
-        const textKo = (explanations[key] ?? '').trim().toLowerCase();
-        const match = textEn.includes(q) || (searchKorean && textKo.includes(q));
-        if (match) keys.push(key);
+    for (const verse of bookVerses) {
+      const key = getVerseKey(verse.bookId, verse.chapter, verse.verse);
+      if (chapterQuery !== null) {
+        if (verse.chapter === chapterQuery) keys.push(key);
+        continue;
       }
+      const textEn = verse.text.toLowerCase();
+      const textKo = (verse.explanation ?? '').toLowerCase();
+      const match = textEn.includes(q) || (searchKorean && textKo.includes(q));
+      if (match) keys.push(key);
     }
     startTransition(() => {
       setSearchResults(keys);
       setCurrentMatchIndex(keys.length > 0 ? 0 : -1);
     });
-  }, [deferredSearchQuery, data, explanations, selectedBookId, version]);
+  }, [deferredSearchQuery, selectedBookId, version, bookVerses]);
 
   useEffect(() => {
     const timer = setTimeout(runSearch, 400);

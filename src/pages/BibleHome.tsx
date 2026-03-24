@@ -6,6 +6,7 @@ import { useTranslation } from '../hooks/useTranslation';
 import { useBibleStore } from '../store/bibleStore';
 import { getScheduleFromBook, getReadingByDayIndex } from '../data/bibleSchedule';
 import { preloadBook } from '../services/bibleCache';
+import { loadExplanations } from '../services/bibleText';
 
 const RECORD_ITEMS: { tab: string | null; key: string; icon: string }[] = [
   { tab: null, key: 'tabMemo', icon: '✏️' },
@@ -26,6 +27,14 @@ export default function BibleHome() {
   useEffect(() => {
     if (reading) preloadBook(reading.bookId);
   }, [reading?.bookId]);
+
+  useEffect(() => {
+    // 홈 진입 시 유휴 시간에 번역 데이터 준비해 첫 진입 지연 완화
+    const id = window.setTimeout(() => {
+      loadExplanations().catch(() => {});
+    }, 500);
+    return () => window.clearTimeout(id);
+  }, []);
 
   return (
     <div className="min-h-screen min-h-[100dvh] flex flex-col bg-white overflow-x-hidden w-full max-w-full">
