@@ -1,6 +1,7 @@
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from '../hooks/useTranslation';
 import { BannerAd } from './BannerAd';
+import { BrandNavBarLabel } from './BrandNavBarLabel';
 
 export function BottomNav() {
   const navigate = useNavigate();
@@ -20,6 +21,7 @@ export function BottomNav() {
           <BannerAd />
         </div>
       )}
+      <BrandNavBarLabel variant="nav" />
       <div className="flex justify-around py-2.5 xs:py-3 px-3 xs:px-4 pl-[max(0.75rem,env(safe-area-inset-left))] pr-[max(0.75rem,env(safe-area-inset-right))]">
         <button
           onClick={() => navigate('/')}
