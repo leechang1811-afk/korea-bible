@@ -43,36 +43,36 @@ export default function BibleHome() {
           <div className="flex-1 min-w-0">
             <AuthBanner />
           </div>
-          <div className="shrink-0 flex items-center gap-1.5 pr-1">
+          <button
+            onClick={() => navigate('/settings')}
+            className="shrink-0 p-2 text-[#5B6475] hover:text-[#1B64F2]"
+            aria-label={t('settings')}
+          >
+            ⚙️
+          </button>
+        </div>
+      </header>
+
+      <div className="flex-1 flex flex-col items-center justify-center px-2 xs:px-3 min-375:px-4 sm:px-6 py-3 xs:py-4 min-390:py-5 sm:py-8 pb-[max(11.5rem,calc(env(safe-area-inset-bottom)+11rem))] overflow-x-hidden w-full box-border">
+        <div className="relative w-full max-w-md rounded-xl xs:rounded-2xl min-390:rounded-3xl p-3 xs:p-5 min-390:p-6 sm:p-8 pb-6 xs:pb-8 min-390:pb-10 sm:pb-12 bg-[#EEF4FF] border border-[#E6EAF2] mx-2 xs:mx-3 min-375:mx-4">
+          <div className="absolute top-3 right-3 xs:top-4 xs:right-4 z-10">
             <div className="flex rounded-lg overflow-hidden border border-[#E6EAF2] bg-white">
               <button
                 onClick={() => setBibleVersion('ko')}
-                className={`min-h-[36px] px-2 xs:px-2.5 py-1 rounded-lg text-[10px] xs:text-xs font-medium ${bibleVersion === 'ko' ? 'bg-[#1B64F2] text-white' : 'bg-white/80 text-[#5B6475]'}`}
+                className={`min-h-[32px] px-2 xs:px-2.5 py-1 text-[10px] xs:text-xs font-medium ${bibleVersion === 'ko' ? 'bg-[#1B64F2] text-white' : 'bg-white/80 text-[#5B6475]'}`}
                 aria-label={t('korean')}
               >
                 한
               </button>
               <button
                 onClick={() => setBibleVersion('en')}
-                className={`min-h-[36px] px-2 xs:px-2.5 py-1 rounded-lg text-[10px] xs:text-xs font-medium ${bibleVersion === 'en' ? 'bg-[#1B64F2] text-white' : 'bg-white/80 text-[#5B6475]'}`}
+                className={`min-h-[32px] px-2 xs:px-2.5 py-1 text-[10px] xs:text-xs font-medium ${bibleVersion === 'en' ? 'bg-[#1B64F2] text-white' : 'bg-white/80 text-[#5B6475]'}`}
                 aria-label={t('english')}
               >
                 EN
               </button>
             </div>
-            <button
-              onClick={() => navigate('/settings')}
-              className="p-2 text-[#5B6475] hover:text-[#1B64F2]"
-              aria-label={t('settings')}
-            >
-              ⚙️
-            </button>
           </div>
-        </div>
-      </header>
-
-      <div className="flex-1 flex flex-col items-center justify-center px-2 xs:px-3 min-375:px-4 sm:px-6 py-3 xs:py-4 min-390:py-5 sm:py-8 pb-[max(11.5rem,calc(env(safe-area-inset-bottom)+11rem))] overflow-x-hidden w-full box-border">
-        <div className="w-full max-w-md rounded-xl xs:rounded-2xl min-390:rounded-3xl p-3 xs:p-5 min-390:p-6 sm:p-8 pb-6 xs:pb-8 min-390:pb-10 sm:pb-12 bg-[#EEF4FF] border border-[#E6EAF2] mx-2 xs:mx-3 min-375:mx-4">
           <div className="flex flex-col items-center pb-3 xs:pb-5 min-390:pb-6">
             <div className="relative w-10 h-12 mb-4" role="img" aria-label="십자가">
               <span className="absolute left-1/2 -translate-x-1/2 top-0 w-1.5 h-12 rounded-sm bg-amber-400" />
