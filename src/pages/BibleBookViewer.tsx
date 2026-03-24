@@ -296,7 +296,7 @@ export default function BibleBookViewer() {
     const handleScroll = () => {
       const mainTop = scrollRef.current?.scrollTop ?? 0;
       const winTop = window.scrollY || document.documentElement.scrollTop || 0;
-      setShowScrollTop(Math.max(mainTop, winTop) > 320);
+      setShowScrollTop(Math.max(mainTop, winTop) > 120);
     };
 
     const mainEl = scrollRef.current;
@@ -371,7 +371,7 @@ export default function BibleBookViewer() {
 
   // 3. 책 내용 + 검색
   return (
-    <div className="min-h-screen min-h-[100dvh] flex flex-col bg-white overflow-x-hidden w-full max-w-full">
+    <div className="h-[100dvh] min-h-screen min-h-[100dvh] flex flex-col bg-white overflow-x-hidden w-full max-w-full">
       <header className="sticky top-0 z-20 pt-[env(safe-area-inset-top)] pb-safe-bottom bg-white border-b border-[#E6EAF2]">
         <div className="flex items-center gap-1.5 xs:gap-2 min-390:gap-2.5 px-2 xs:px-3 min-390:px-4 py-2.5 min-375:py-3">
           <div className="flex items-center gap-0.5 shrink-0">
@@ -411,7 +411,7 @@ export default function BibleBookViewer() {
       </header>
       <main
         ref={scrollRef}
-        className="flex-1 overflow-y-auto px-2 xs:px-3 min-375:px-4 min-428:px-5 sm:px-6 py-3 xs:py-4 min-390:py-5 sm:py-6 pb-[max(1.5rem,env(safe-area-inset-bottom))]"
+        className="flex-1 min-h-0 overflow-y-auto px-2 xs:px-3 min-375:px-4 min-428:px-5 sm:px-6 py-3 xs:py-4 min-390:py-5 sm:py-6 pb-[max(1.5rem,env(safe-area-inset-bottom))]"
       >
         <div className="max-w-2xl mx-auto" style={{ height: `${rowVirtualizer.getTotalSize() + 24}px`, position: 'relative', width: '100%', paddingTop: 12, paddingBottom: 12 }}>
           {rowVirtualizer.getVirtualItems().map((virtualRow) => {
