@@ -14,25 +14,45 @@ export default function BibleJournal() {
   const [searchParams] = useSearchParams();
   const tab = searchParams.get('tab');
   const { t } = useTranslation();
-  const { getMemosByDate, getDailyVersesByDate, searchMemos, searchDailyVerses, deleteMemo, removeBookmark, removeDailyVerse, memos, bookmarks, dailyVerses } = useBibleStore();
+  const { getDailyVersesByDate, searchDailyVerses, deleteMemo, removeBookmark, removeDailyVerse, memos, bookmarks, dailyVerses } = useBibleStore();
   const [search, setSearch] = useState('');
   const [dateFilter, setDateFilter] = useState('');
   const [viewMode, setViewMode] = useState<'list' | 'search'>('list');
 
+  const groupedMemos = useMemo(() => {
+    const map = new Map<string, BibleMemo[]>();
+    memos.forEach((m) => {
+      if (!map.has(m.date)) map.set(m.date, []);
+      map.get(m.date)!.push(m);
+    });
+    return Array.from(map.entries())
+      .sort(([a], [b]) => b.localeCompare(a))
+      .map(([date, items]) => ({
+        date,
+        items: items.sort((a, b) => b.createdAt - a.createdAt),
+      }));
+  }, [memos]);
+
+  const groupedBookmarks = useMemo(() => {
+    const map = new Map<string, BibleBookmark[]>();
+    bookmarks.forEach((b) => {
+      if (!map.has(b.date)) map.set(b.date, []);
+      map.get(b.date)!.push(b);
+    });
+    return Array.from(map.entries())
+      .sort(([a], [b]) => b.localeCompare(a))
+      .map(([date, items]) => ({
+        date,
+        items: items.sort((a, b) => b.createdAt - a.createdAt),
+      }));
+  }, [bookmarks]);
+
   const byDateRaw = useMemo(() => {
-    const data = getMemosByDate();
     if (tab === 'bookmarks') {
-      return data.map((d) => ({
-        ...d,
-        items: d.items.filter((x) => !isMemo(x)),
-      })).filter((d) => d.items.length > 0);
+      return groupedBookmarks;
     }
-    // 기본 탭(메모): 메모만 노출
-    return data.map((d) => ({
-      ...d,
-      items: d.items.filter((x) => isMemo(x)),
-    })).filter((d) => d.items.length > 0);
-  }, [getMemosByDate, memos, bookmarks, tab]);
+    return groupedMemos;
+  }, [groupedMemos, groupedBookmarks, tab]);
 
   const byDate = useMemo(() => {
     if (!dateFilter.trim()) return byDateRaw;
@@ -50,10 +70,28 @@ export default function BibleJournal() {
   }, [versesByDateRaw, dateFilter]);
 
   const searchResults = useMemo(() => {
-    if (!search.trim()) return [];
-    const all = searchMemos(search);
-    return tab === 'bookmarks' ? all.filter((x) => !isMemo(x)) : all.filter((x) => isMemo(x));
-  }, [search, searchMemos, memos, bookmarks, tab]);
+    const q = search.trim().toLowerCase();
+    if (!q) return [];
+    const check = (text: string) => text.toLowerCase().includes(q);
+
+    if (tab === 'bookmarks') {
+      return bookmarks
+        .filter((b) => check(b.readingRef))
+        .sort((a, b) => b.createdAt - a.createdAt);
+    }
+
+    return memos
+      .filter(
+        (m) =>
+          check(m.readingRef) ||
+          check(m.memo1) ||
+          check(m.memo2) ||
+          check(m.dailyNote) ||
+          check(m.question1) ||
+          check(m.question2)
+      )
+      .sort((a, b) => b.createdAt - a.createdAt);
+  }, [search, tab, memos, bookmarks]);
 
   const verseSearchResults = useMemo(
     () => (search.trim() ? searchDailyVerses(search) : []),
