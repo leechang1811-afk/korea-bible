@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import {
   getScheduleFromBook,
   getReadingByDayIndex,
+  getReadingPlanKey,
   type ReadingItem,
 } from '../data/bibleSchedule';
 import { getMeditationQuestion } from '../data/meditationQuestions';
@@ -43,6 +44,11 @@ export default function BibleDaily() {
     [startBookId, customOrder]
   );
 
+  const planKey = useMemo(
+    () => getReadingPlanKey(startBookId, customOrder),
+    [startBookId, customOrder]
+  );
+
   const reading = getReadingByDayIndex(schedule, currentDayIndex);
   const { t, locale } = useTranslation();
   const q = reading ? getMeditationQuestion(reading.bookId, locale) : '';
@@ -76,8 +82,14 @@ export default function BibleDaily() {
   }, [reading?.bookId, reading?.startCh, reading?.endCh, bibleVersion]);
 
   const existingMemo = useMemo(
-    () => memos.find((m) => m.dayIndex === currentDayIndex && m.date === today),
-    [memos, currentDayIndex, today]
+    () =>
+      memos.find(
+        (m) =>
+          m.dayIndex === currentDayIndex &&
+          m.date === today &&
+          (m.planKey ?? 'genesis') === planKey
+      ),
+    [memos, currentDayIndex, today, planKey]
   );
 
   useEffect(() => {
@@ -112,7 +124,10 @@ export default function BibleDaily() {
     if (!reading) return;
     if (bookmarked) {
       const b = useBibleStore.getState().bookmarks.find(
-        (x) => x.dayIndex === reading.dayIndex && x.date === today
+        (x) =>
+          x.dayIndex === reading.dayIndex &&
+          x.date === today &&
+          (x.planKey ?? 'genesis') === planKey
       );
       if (b) useBibleStore.getState().removeBookmark(b.id);
     } else {
@@ -137,6 +152,7 @@ export default function BibleDaily() {
         memo1,
         memo2: '',
         dailyNote,
+        planKey,
       });
     }
   };

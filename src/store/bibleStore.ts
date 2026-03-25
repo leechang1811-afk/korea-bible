@@ -16,6 +16,8 @@ export interface BibleMemo {
   memo2: string;
   dailyNote: string;
   createdAt: number;
+  /** getReadingPlanKey — 전서 변경 시 동일 일차와 구분 */
+  planKey?: string;
 }
 
 export interface BibleBookmark {
@@ -24,6 +26,7 @@ export interface BibleBookmark {
   readingRef: string;
   date: string;
   createdAt: number;
+  planKey?: string;
 }
 
 export interface BibleDailyVerse {
@@ -120,8 +123,18 @@ export const useBibleStore = create<{
       setShowExplanation: (v) => set({ showExplanation: v }),
       setCurrentDay: (day) => set({ currentDayIndex: Math.max(1, day) }),
       addBookmark: (item, date) => {
-        const { bookmarks } = get();
-        if (bookmarks.some((b) => b.dayIndex === item.dayIndex && b.date === date)) return;
+        const { bookmarks, startBookId, customOrder } = get();
+        const planKey = getReadingPlanKey(startBookId, customOrder);
+        if (
+          bookmarks.some(
+            (b) =>
+              b.dayIndex === item.dayIndex &&
+              b.date === date &&
+              (b.planKey ?? 'genesis') === planKey
+          )
+        ) {
+          return;
+        }
         set({
           bookmarks: [
             ...bookmarks,
@@ -131,16 +144,29 @@ export const useBibleStore = create<{
               readingRef: `${item.book} ${item.startCh}${item.endCh !== item.startCh ? `-${item.endCh}` : ''}장`,
               date,
               createdAt: Date.now(),
+              planKey,
             },
           ],
         });
       },
       removeBookmark: (id) => set((s) => ({ bookmarks: s.bookmarks.filter((b) => b.id !== id) })),
-      isBookmarked: (dayIndex, date) => get().bookmarks.some((b) => b.dayIndex === dayIndex && b.date === date),
-      saveMemo: (memo) =>
+      isBookmarked: (dayIndex, date) => {
+        const { bookmarks, startBookId, customOrder } = get();
+        const planKey = getReadingPlanKey(startBookId, customOrder);
+        return bookmarks.some(
+          (b) =>
+            b.dayIndex === dayIndex &&
+            b.date === date &&
+            (b.planKey ?? 'genesis') === planKey
+        );
+      },
+      saveMemo: (memo) => {
+        const { startBookId, customOrder } = get();
+        const pk = memo.planKey ?? getReadingPlanKey(startBookId, customOrder);
         set((s) => ({
-          memos: [...s.memos, { ...memo, id: genId(), createdAt: Date.now() }],
-        })),
+          memos: [...s.memos, { ...memo, planKey: pk, id: genId(), createdAt: Date.now() }],
+        }));
+      },
       updateMemo: (id, updates) =>
         set((s) => ({ memos: s.memos.map((m) => (m.id === id ? { ...m, ...updates } : m)) })),
       deleteMemo: (id) => set((s) => ({ memos: s.memos.filter((m) => m.id !== id) })),
@@ -232,6 +258,20 @@ export const useBibleStore = create<{
           merged.completedDays = raw.map((c) => ({
             ...c,
             planKey: c.planKey ?? 'genesis',
+          }));
+        }
+        const rawMemos = merged.memos as BibleMemo[] | undefined;
+        if (Array.isArray(rawMemos)) {
+          merged.memos = rawMemos.map((m) => ({
+            ...m,
+            planKey: m.planKey ?? 'genesis',
+          }));
+        }
+        const rawBm = merged.bookmarks as BibleBookmark[] | undefined;
+        if (Array.isArray(rawBm)) {
+          merged.bookmarks = rawBm.map((b) => ({
+            ...b,
+            planKey: b.planKey ?? 'genesis',
           }));
         }
         return merged;

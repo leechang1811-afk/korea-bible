@@ -13,6 +13,7 @@ function toDbMemo(m: BibleMemo) {
     memo1: m.memo1,
     memo2: m.memo2,
     daily_note: m.dailyNote,
+    plan_key: m.planKey ?? 'genesis',
   };
 }
 
@@ -28,6 +29,7 @@ function fromDbMemo(r: Record<string, unknown>): BibleMemo {
     memo2: (r.memo2 as string) || '',
     dailyNote: (r.daily_note as string) || '',
     createdAt: new Date(r.created_at as string).getTime(),
+    planKey: (r.plan_key as string) || 'genesis',
   };
 }
 
@@ -38,6 +40,7 @@ function fromDbBookmark(r: Record<string, unknown>): BibleBookmark {
     readingRef: r.reading_ref as string,
     date: r.date as string,
     createdAt: new Date(r.created_at as string).getTime(),
+    planKey: (r.plan_key as string) || 'genesis',
   };
 }
 
@@ -104,6 +107,7 @@ export async function saveMemoToSupabase(memo: BibleMemo, userId: string) {
     memo1: memo.memo1,
     memo2: memo.memo2,
     daily_note: memo.dailyNote,
+    plan_key: memo.planKey ?? 'genesis',
   });
 }
 
@@ -120,6 +124,7 @@ export async function addBookmarkToSupabase(bookmark: BibleBookmark, userId: str
     day_index: bookmark.dayIndex,
     reading_ref: bookmark.readingRef,
     date: bookmark.date,
+    plan_key: bookmark.planKey ?? 'genesis',
   });
 }
 
@@ -220,6 +225,7 @@ export async function syncAllToSupabase(
         memo1: m.memo1,
         memo2: m.memo2,
         daily_note: m.dailyNote,
+        plan_key: m.planKey ?? 'genesis',
       }))
     );
   }
@@ -231,6 +237,7 @@ export async function syncAllToSupabase(
         day_index: b.dayIndex,
         reading_ref: b.readingRef,
         date: b.date,
+        plan_key: b.planKey ?? 'genesis',
       }))
     );
   }
