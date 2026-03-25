@@ -126,7 +126,7 @@ export default function BibleProgress() {
   };
 
   return (
-    <div className="min-h-screen min-h-[100dvh] bg-[#f8fafc] pb-[max(11.5rem,calc(env(safe-area-inset-bottom)+11rem))] overflow-x-hidden w-full max-w-full">
+    <div className="min-h-screen min-h-[100dvh] bg-[#f8fafc] pb-[max(9.75rem,calc(env(safe-area-inset-bottom)+9.35rem))] overflow-x-hidden w-full max-w-full">
       <header className="sticky top-0 z-10 bg-white border-b border-[#E6EAF2] shadow-sm pt-[max(0.5rem,env(safe-area-inset-top))]">
         <div className="flex items-center justify-between px-2 xs:px-3 min-375:px-4 min-390:px-5 py-2.5 xs:py-3 min-390:py-3.5">
           <button

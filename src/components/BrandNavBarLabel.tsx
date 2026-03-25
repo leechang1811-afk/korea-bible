@@ -11,17 +11,19 @@ export function BrandNavBarLabel({ variant = 'nav' }: { variant?: 'nav' | 'heade
 
   return (
     <div
-      className={`flex justify-center items-center min-h-[44px] px-3 py-1.5 bg-[#f8fafc] ${edge}`}
+      className={`flex justify-center items-center min-h-[38px] px-3 py-1 bg-[#f8fafc] ${edge}`}
       role="presentation"
     >
-      <img
-        src={BRAND_LOGO_SRC}
-        alt={t('appTitle')}
-        width={40}
-        height={40}
-        className="h-10 w-10 shrink-0 rounded-xl object-contain shadow-sm border border-[#E6EAF2] bg-white"
-        decoding="async"
-      />
+      <span className="h-9 w-9 shrink-0 rounded-full overflow-hidden shadow-sm ring-1 ring-[#E6EAF2] bg-white block">
+        <img
+          src={BRAND_LOGO_SRC}
+          alt={t('appTitle')}
+          width={36}
+          height={36}
+          className="h-full w-full object-cover"
+          decoding="async"
+        />
+      </span>
     </div>
   );
 }

@@ -53,7 +53,7 @@ export default function BibleHome() {
         </div>
       </header>
 
-      <div className="flex-1 flex flex-col items-center justify-center px-2 xs:px-3 min-375:px-4 sm:px-6 py-3 xs:py-4 min-390:py-5 sm:py-8 pb-[max(11.5rem,calc(env(safe-area-inset-bottom)+11rem))] overflow-x-hidden w-full box-border">
+      <div className="flex-1 flex flex-col items-center justify-center px-2 xs:px-3 min-375:px-4 sm:px-6 py-3 xs:py-4 min-390:py-5 sm:py-8 pb-[max(9.75rem,calc(env(safe-area-inset-bottom)+9.35rem))] overflow-x-hidden w-full box-border">
         <div className="relative w-full max-w-md rounded-xl xs:rounded-2xl min-390:rounded-3xl p-3 xs:p-5 min-390:p-6 sm:p-8 pb-6 xs:pb-8 min-390:pb-10 sm:pb-12 bg-[#EEF4FF] border border-[#E6EAF2] mx-2 xs:mx-3 min-375:mx-4">
           <div className="absolute top-3 right-3 xs:top-4 xs:right-4 z-10">
             <div className="flex rounded-lg overflow-hidden border border-[#E6EAF2] bg-white">

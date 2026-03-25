@@ -44,7 +44,7 @@ function ToastMessage({ message, onClose }: { message: string; onClose: () => vo
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -10 }}
-      className="fixed bottom-[max(5rem,calc(env(safe-area-inset-bottom)+4rem))] left-1/2 -translate-x-1/2 z-[9999] px-4 py-3 rounded-xl bg-[#0B1220] text-white text-sm font-medium shadow-lg"
+      className="fixed bottom-[max(4.25rem,calc(env(safe-area-inset-bottom)+3.4rem))] left-1/2 -translate-x-1/2 z-[9999] px-4 py-3 rounded-xl bg-[#0B1220] text-white text-sm font-medium shadow-lg"
     >
       {message}
     </motion.div>

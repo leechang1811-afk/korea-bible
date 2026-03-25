@@ -445,7 +445,7 @@ export default function BibleBookViewer() {
       </main>
       <button
         onClick={scrollToTop}
-        className="fixed right-4 xs:right-5 bottom-[max(5rem,calc(env(safe-area-inset-bottom)+4.5rem))] z-40 w-11 h-11 rounded-full bg-[#1B64F2] text-white shadow-lg hover:bg-[#1557e0] active:opacity-90 touch-target"
+        className="fixed right-4 xs:right-5 bottom-[max(4.25rem,calc(env(safe-area-inset-bottom)+3.8rem))] z-40 w-11 h-11 rounded-full bg-[#1B64F2] text-white shadow-lg hover:bg-[#1557e0] active:opacity-90 touch-target"
         aria-label="맨 위로"
         title="맨 위로"
       >
