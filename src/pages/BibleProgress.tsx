@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getScheduleFromBook, getReadingByDayIndex, getReadingPlanKey } from '../data/bibleSchedule';
+import { getScheduleFromBook, getReadingByDayIndex, getReadingPlanKey, parseReadingPlanKey } from '../data/bibleSchedule';
 import { useBibleStore, type CompletedDay } from '../store/bibleStore';
 import { useTranslation } from '../hooks/useTranslation';
 import { BottomNav } from '../components/BottomNav';
@@ -26,28 +26,53 @@ export default function BibleProgress() {
     () => getScheduleFromBook(startBookId, customOrder ?? undefined),
     [startBookId, customOrder]
   );
-
-  const totalDays = schedule.length;
-  const planKey = useMemo(
+  const currentPlanKey = useMemo(
     () => getReadingPlanKey(startBookId, customOrder),
     [startBookId, customOrder]
   );
-  /** 현재 전서(읽기 플랜)에 해당하는 완료만 — 일차는 플랜마다 다름 */
-  const completedForPlan = useMemo(
-    () => completedDays.filter((c) => (c.planKey ?? 'genesis') === planKey),
-    [completedDays, planKey]
-  );
-  /** dayIndex당 가장 오래전에 체크한 것만 사용 (진도율·캘린더·목록) */
-  const completedByOldest = useMemo(() => {
-    const byDay = new Map<number, CompletedDay>();
-    for (const c of completedForPlan) {
-      const existing = byDay.get(c.dayIndex);
-      if (!existing || c.date < existing.date || (c.date === existing.date && c.createdAt < existing.createdAt)) {
-        byDay.set(c.dayIndex, c);
+
+  const totalDays = schedule.length;
+  /**
+   * 여러 전서 플랜에서 체크한 완료를 하나의 "실제 읽기 구간(book/ch range)" 단위로 병합.
+   * - 같은 구간은 가장 오래된 체크 1건만 유지
+   * - 레거시 데이터(파싱 실패)는 plan/day로 폴백
+   */
+  const completedByReading = useMemo(() => {
+    const scheduleCache = new Map<string, ReturnType<typeof getScheduleFromBook>>();
+    const byReading = new Map<string, { completed: CompletedDay; readingRef: string }>();
+
+    const resolveSchedule = (planKey: string) => {
+      const cacheHit = scheduleCache.get(planKey);
+      if (cacheHit) return cacheHit;
+      const parsed = parseReadingPlanKey(planKey);
+      const s = getScheduleFromBook(parsed.startBookId, parsed.customOrder);
+      scheduleCache.set(planKey, s);
+      return s;
+    };
+
+    for (const c of completedDays) {
+      const keyPlan = c.planKey ?? 'genesis';
+      const planSchedule = resolveSchedule(keyPlan);
+      const r = getReadingByDayIndex(planSchedule, c.dayIndex);
+      const readingKey = r
+        ? `${r.bookId}:${r.startCh}-${r.endCh}`
+        : `legacy:${keyPlan}:${c.dayIndex}`;
+      const readingRef = r
+        ? `${r.book} ${r.startCh}${r.endCh !== r.startCh ? `-${r.endCh}` : ''}장`
+        : `${c.dayIndex}일차`;
+
+      const existing = byReading.get(readingKey);
+      if (!existing || c.date < existing.completed.date || (c.date === existing.completed.date && c.createdAt < existing.completed.createdAt)) {
+        byReading.set(readingKey, { completed: c, readingRef });
       }
     }
-    return Array.from(byDay.values());
-  }, [completedForPlan]);
+    return Array.from(byReading.values());
+  }, [completedDays]);
+
+  const completedByOldest = useMemo(
+    () => completedByReading.map((x) => x.completed),
+    [completedByReading]
+  );
 
   const completedDayIndexes = useMemo(
     () => new Set(completedByOldest.map((c) => c.dayIndex)),
@@ -67,14 +92,13 @@ export default function BibleProgress() {
 
   const completedListWithRef = useMemo(
     () =>
-      completedByOldest
-        .map((c) => {
-          const r = getReadingByDayIndex(schedule, c.dayIndex);
-          const ref = r ? `${r.book} ${r.startCh}${r.endCh !== r.startCh ? `-${r.endCh}` : ''}장` : '';
-          return { ...c, readingRef: ref };
-        })
+      completedByReading
+        .map(({ completed, readingRef }) => ({
+          ...completed,
+          readingRef,
+        }))
         .sort((a, b) => b.date.localeCompare(a.date)),
-    [completedByOldest, schedule]
+    [completedByReading]
   );
 
   const now = new Date();
@@ -196,7 +220,11 @@ export default function BibleProgress() {
             {calendarDays.map((cell, idx) => {
               const completed = completedByDate.has(cell.date);
               const item = completedListWithRef.find((c) => c.date === cell.date);
-              const canGo = completed && item && cell.isCurrentMonth;
+              const canGo =
+                completed &&
+                item &&
+                cell.isCurrentMonth &&
+                (item.planKey ?? 'genesis') === currentPlanKey;
               return (
                 <button
                   key={`${cell.date}-${idx}`}
@@ -225,7 +253,7 @@ export default function BibleProgress() {
               <div className="space-y-2 max-h-[200px] overflow-y-auto">
                 {completedListWithRef.slice(0, 50).map((c) => (
                   <div
-                    key={`${c.dayIndex}-${c.date}`}
+                    key={`${c.dayIndex}-${c.date}-${c.readingRef}`}
                     className="flex items-center gap-2 px-3 py-2 rounded-lg bg-[#EEF4FF] text-[#1B64F2] text-xs"
                   >
                     <span className="font-medium shrink-0">{c.date}</span>

@@ -120,6 +120,17 @@ export function getReadingPlanKey(startBookId: string, customOrder: string[] | n
   return startBookId;
 }
 
+export function parseReadingPlanKey(planKey: string): { startBookId: string; customOrder?: string[] } {
+  if (!planKey.includes('::')) {
+    return { startBookId: planKey };
+  }
+  const [startBookId, orderCsv] = planKey.split('::');
+  const customOrder = orderCsv
+    ? orderCsv.split(',').map((x) => x.trim()).filter(Boolean)
+    : undefined;
+  return { startBookId, customOrder };
+}
+
 export function getReadingByDayIndex(schedule: ReadingItem[], dayIndex: number): ReadingItem | undefined {
   return schedule.find((r) => r.dayIndex === dayIndex);
 }
