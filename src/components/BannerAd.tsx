@@ -29,5 +29,6 @@ export function BannerAd() {
     };
   }, [isInitialized, attachBanner]);
 
-  return <div ref={containerRef} className="w-full shrink-0" style={{ width: '100%', height: 96 }} />;
+  /* 높이 축소: 탭 바와 합쳐도 과도한 하단 점유 방지(광고 SDK가 허용하는 범위에서 조정) */
+  return <div ref={containerRef} className="w-full shrink-0" style={{ width: '100%', height: 72 }} />;
 }

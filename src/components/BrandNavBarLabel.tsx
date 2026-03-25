@@ -11,16 +11,16 @@ export function BrandNavBarLabel({ variant = 'nav' }: { variant?: 'nav' | 'heade
 
   return (
     <div
-      className={`flex justify-center items-center min-h-[32px] px-3 py-0.5 bg-[#f8fafc] ${edge}`}
+      className={`flex justify-center items-center min-h-[28px] px-3 py-0.5 bg-[#f8fafc] ${edge}`}
       role="presentation"
     >
-      <span className="h-8 w-8 shrink-0 rounded-full overflow-hidden shadow-sm ring-1 ring-[#E6EAF2] bg-white flex items-center justify-center">
+      <span className="size-8 shrink-0 rounded-md shadow-sm ring-1 ring-[#E6EAF2] bg-white flex items-center justify-center p-[3px] box-border">
         <img
           src={BRAND_LOGO_SRC}
           alt={t('appTitle')}
-          width={32}
-          height={32}
-          className="max-h-full max-w-full object-contain"
+          width={64}
+          height={64}
+          className="h-full w-full object-contain"
           decoding="async"
         />
       </span>

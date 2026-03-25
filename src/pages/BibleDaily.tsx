@@ -215,7 +215,7 @@ export default function BibleDaily() {
       : `${bookDisplay} ${reading.startCh}${reading.endCh !== reading.startCh ? `-${reading.endCh}` : ''}`;
 
   return (
-    <div className="min-h-screen min-h-[100dvh] bg-[#f8fafc] pb-[max(8.3rem,calc(env(safe-area-inset-bottom)+7.95rem))] overflow-x-hidden w-full max-w-full">
+    <div className="min-h-screen min-h-[100dvh] bg-[#f8fafc] pb-[max(7.1rem,calc(env(safe-area-inset-bottom)+6.8rem))] overflow-x-hidden w-full max-w-full">
       {/* 상단 헤더 */}
       <header className="sticky top-0 z-10 bg-white border-b border-[#E6EAF2] shadow-sm pt-[max(0.5rem,env(safe-area-inset-top))]">
         <div className="flex items-center justify-between px-2 xs:px-3 min-375:px-4 min-390:px-5 py-2.5 xs:py-3 min-390:py-3.5">
