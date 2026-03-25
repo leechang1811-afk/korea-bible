@@ -11,6 +11,9 @@ export const translations: Record<Locale, Record<string, string>> = {
     appTitle: '성경 1일1독',
     settings: '설정',
     journal: '나의 기록',
+    /** 1일1독 상단 우측 등 짧은 라벨(띄어쓰기 없음) */
+    journalHeaderTight: '나의기록',
+    scrollToTop: '맨 위로',
     todayRead: '오늘 읽기',
     navHome: '홈',
     navProgress: '진도',
@@ -163,6 +166,8 @@ export const translations: Record<Locale, Record<string, string>> = {
     appTitle: 'Bible 1 Day 1 Read',
     settings: 'Settings',
     journal: 'Journal',
+    journalHeaderTight: 'Journal',
+    scrollToTop: 'Scroll to top',
     todayRead: 'Today\'s Read',
     navHome: 'Home',
     navProgress: 'Progress',

@@ -1,4 +1,4 @@
-import { useMemo, useState, useEffect, useRef } from 'react';
+import { useMemo, useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
@@ -193,6 +193,10 @@ export default function BibleDaily() {
     startPlayback(0);
   };
 
+  const scrollToTop = useCallback(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, []);
+
   if (!reading) {
     return (
       <div className="min-h-screen min-h-[100dvh] bg-[#f8fafc] p-6 flex flex-col items-center justify-center overflow-x-hidden w-full max-w-full">
@@ -214,7 +218,7 @@ export default function BibleDaily() {
       : `${bookDisplay} ${reading.startCh}${reading.endCh !== reading.startCh ? `-${reading.endCh}` : ''}`;
 
   return (
-    <div className="min-h-screen min-h-[100dvh] bg-[#f8fafc] pb-[max(1.25rem,calc(env(safe-area-inset-bottom)+1rem))] overflow-x-hidden w-full max-w-full">
+    <div className="min-h-screen min-h-[100dvh] bg-[#f8fafc] pb-[max(4.5rem,calc(env(safe-area-inset-bottom)+4rem))] overflow-x-hidden w-full max-w-full">
       {/* 상단 헤더 */}
       <header className="sticky top-0 z-10 bg-white border-b border-[#E6EAF2] shadow-sm pt-[max(0.5rem,env(safe-area-inset-top))]">
         <div className="flex items-center justify-between px-2 xs:px-3 min-375:px-4 min-390:px-5 py-2.5 xs:py-3 min-390:py-3.5">
@@ -228,10 +232,11 @@ export default function BibleDaily() {
             {t('appTitle')}
           </span>
           <button
+            type="button"
             onClick={() => navigate('/journal')}
-            className="text-[#1B64F2] text-sm font-medium"
+            className="text-[#1B64F2] text-sm font-medium whitespace-nowrap shrink-0"
           >
-            {t('journal')}
+            {t('journalHeaderTight')}
           </button>
         </div>
       </header>
@@ -444,6 +449,16 @@ export default function BibleDaily() {
           </button>
         </div>
       </div>
+
+      <button
+        type="button"
+        onClick={scrollToTop}
+        className="fixed right-4 xs:right-5 bottom-[max(1rem,calc(env(safe-area-inset-bottom)+0.75rem))] z-40 w-11 h-11 rounded-full bg-[#1B64F2] text-white shadow-lg hover:bg-[#1557e0] active:opacity-90 touch-target"
+        aria-label={t('scrollToTop')}
+        title={t('scrollToTop')}
+      >
+        ↑
+      </button>
     </div>
   );
 }
