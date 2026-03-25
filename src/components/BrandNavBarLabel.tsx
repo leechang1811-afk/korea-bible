@@ -1,6 +1,9 @@
 import { useTranslation } from '../hooks/useTranslation';
 
-/** 앱인토스 심사: 공통 내비/헤더에 브랜드(앱명) 노출 */
+/** 콘솔·스토어에 등록한 앱 로고( public/brand-logo.png ) */
+const BRAND_LOGO_SRC = '/brand-logo.png';
+
+/** 앱인토스 심사: 공통 내비/헤더에 브랜드 로고 노출 */
 export function BrandNavBarLabel({ variant = 'nav' }: { variant?: 'nav' | 'header' }) {
   const { t } = useTranslation();
   const edge =
@@ -8,17 +11,17 @@ export function BrandNavBarLabel({ variant = 'nav' }: { variant?: 'nav' | 'heade
 
   return (
     <div
-      className={`flex justify-center items-center min-h-[28px] px-3 bg-[#f8fafc] ${edge}`}
+      className={`flex justify-center items-center min-h-[44px] px-3 py-1.5 bg-[#f8fafc] ${edge}`}
       role="presentation"
     >
-      <span className="flex items-center gap-1 max-w-full min-w-0" aria-label={t('appTitle')}>
-        <span className="text-sm shrink-0" aria-hidden>
-          📖
-        </span>
-        <span className="text-[11px] xs:text-xs font-semibold text-[#1B64F2] truncate">
-          {t('appTitle')}
-        </span>
-      </span>
+      <img
+        src={BRAND_LOGO_SRC}
+        alt={t('appTitle')}
+        width={40}
+        height={40}
+        className="h-10 w-10 shrink-0 rounded-xl object-contain shadow-sm border border-[#E6EAF2] bg-white"
+        decoding="async"
+      />
     </div>
   );
 }
