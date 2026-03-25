@@ -69,7 +69,19 @@ CREATE UNIQUE INDEX IF NOT EXISTS bible_completed_days_user_plan_day_idx
   ON bible_completed_days(user_id, plan_key, day_index);
 ```
 
-## 5. 참고
+## 5. bible_memos / bible_bookmarks — plan_key (찜·메모 전서 구분)
+
+로그인 동기화를 쓰는 경우 아래로 컬럼을 추가하세요 (없으면 upsert가 실패할 수 있음).
+
+```sql
+ALTER TABLE bible_memos
+  ADD COLUMN IF NOT EXISTS plan_key TEXT NOT NULL DEFAULT 'genesis';
+
+ALTER TABLE bible_bookmarks
+  ADD COLUMN IF NOT EXISTS plan_key TEXT NOT NULL DEFAULT 'genesis';
+```
+
+## 6. 참고
 
 - `CREATE TABLE IF NOT EXISTS`로 이미 테이블이 있으면 스킵됩니다.
 - 정책이 이미 있으면 `CREATE POLICY`에서 에러가 날 수 있습니다. 그 경우 해당 정책만 수동으로 제거 후 다시 실행하세요.
