@@ -3,7 +3,6 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { useBibleStore } from '../store/bibleStore';
 import { useTranslation } from '../hooks/useTranslation';
-import { BrandNavBarLabel } from '../components/BrandNavBarLabel';
 import { loadBook, loadExplanations, getBookName, getVerseKey, type BibleVersion } from '../services/bibleText';
 import { BIBLE_BOOKS_ORDER, CHAPTER_COUNTS } from '../data/bibleSchedule';
 
@@ -341,7 +340,6 @@ export default function BibleBookViewer() {
               <button onClick={() => setBibleVersion('en')} className={`min-h-[40px] px-2.5 py-1.5 text-[11px] xs:text-xs font-medium ${version === 'en' ? 'bg-[#1B64F2] text-white' : 'bg-white text-[#5B6475]'}`}>{t('english')}</button>
             </div>
           </div>
-          <BrandNavBarLabel variant="header" />
         </header>
         <main className="flex-1 overflow-y-auto px-2 xs:px-3 min-390:px-4 py-4 sm:py-6 pb-[max(1.5rem,env(safe-area-inset-bottom))]">
           <div className="max-w-2xl mx-auto grid grid-cols-2 xs:grid-cols-3 min-390:grid-cols-4 gap-2 xs:gap-2.5">
@@ -363,10 +361,7 @@ export default function BibleBookViewer() {
   // 2. 책 내용 화면 (로딩 중)
   if (loading) {
     return (
-      <div className="min-h-screen min-h-[100dvh] flex flex-col bg-white overflow-x-hidden w-full max-w-full">
-        <div className="pt-[env(safe-area-inset-top)] bg-white">
-          <BrandNavBarLabel variant="nav" />
-        </div>
+      <div className="min-h-screen min-h-[100dvh] flex flex-col bg-white overflow-x-hidden w-full max-w-full pt-[env(safe-area-inset-top)]">
         <div className="flex-1 flex items-center justify-center">
           <p className="text-[#5B6475] text-sm">{t('bibleLoading')}</p>
         </div>
@@ -395,7 +390,6 @@ export default function BibleBookViewer() {
             <button onClick={goToPicker} className="min-h-[44px] px-2 xs:px-2.5 py-1.5 text-[11px] xs:text-xs font-medium rounded-lg border border-[#E6EAF2] bg-white text-[#5B6475] hover:bg-[#f1f5f9] whitespace-nowrap">{t('selectOtherBook')}</button>
           </div>
         </div>
-        <BrandNavBarLabel variant="header" />
       </header>
       <main
         ref={scrollRef}
@@ -445,7 +439,7 @@ export default function BibleBookViewer() {
       </main>
       <button
         onClick={scrollToTop}
-        className="fixed right-4 xs:right-5 bottom-[max(3.05rem,calc(env(safe-area-inset-bottom)+2.75rem))] z-40 w-11 h-11 rounded-full bg-[#1B64F2] text-white shadow-lg hover:bg-[#1557e0] active:opacity-90 touch-target"
+        className="fixed right-4 xs:right-5 bottom-[max(1rem,calc(env(safe-area-inset-bottom)+0.75rem))] z-40 w-11 h-11 rounded-full bg-[#1B64F2] text-white shadow-lg hover:bg-[#1557e0] active:opacity-90 touch-target"
         aria-label="맨 위로"
         title="맨 위로"
       >
