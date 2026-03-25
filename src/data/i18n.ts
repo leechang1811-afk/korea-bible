@@ -14,6 +14,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     /** 1일1독 상단 우측 등 짧은 라벨(띄어쓰기 없음) */
     journalHeaderTight: '나의기록',
     scrollToTop: '맨 위로',
+    moreMenu: '더보기',
     todayRead: '오늘 읽기',
     navHome: '홈',
     navProgress: '진도',
@@ -168,6 +169,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     journal: 'Journal',
     journalHeaderTight: 'Journal',
     scrollToTop: 'Scroll to top',
+    moreMenu: 'More',
     todayRead: 'Today\'s Read',
     navHome: 'Home',
     navProgress: 'Progress',

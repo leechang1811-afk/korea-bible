@@ -223,21 +223,17 @@ export default function BibleDaily() {
       <header className="sticky top-0 z-10 bg-white border-b border-[#E6EAF2] shadow-sm pt-[max(0.5rem,env(safe-area-inset-top))]">
         <div className="flex items-center justify-between px-2 xs:px-3 min-375:px-4 min-390:px-5 py-2.5 xs:py-3 min-390:py-3.5">
           <button
+            type="button"
             onClick={() => navigate('/')}
-            className="text-[#5B6475] text-sm font-medium"
+            className="text-[#5B6475] text-sm font-medium min-w-0 shrink"
           >
             {t('back')}
           </button>
-          <span className="text-[#0B1220] font-semibold text-sm">
+          <span className="text-[#0B1220] font-semibold text-sm text-center flex-1 min-w-0 px-1 truncate">
             {t('appTitle')}
           </span>
-          <button
-            type="button"
-            onClick={() => navigate('/journal')}
-            className="text-[#1B64F2] text-sm font-medium whitespace-nowrap shrink-0"
-          >
-            {t('journalHeaderTight')}
-          </button>
+          {/* 우측 나의기록은 토스 등 좁은 화면에서 잘림 → ⋯ 메뉴로 이동 */}
+          <span className="w-14 shrink-0" aria-hidden />
         </div>
       </header>
 
@@ -345,9 +341,10 @@ export default function BibleDaily() {
               </button>
               <div className="relative ml-auto" ref={moreRef}>
                 <button
+                  type="button"
                   onClick={() => setMoreOpen((o) => !o)}
                   className="w-9 h-9 rounded-lg flex items-center justify-center bg-[#f1f5f9] text-[#5B6475] touch-target"
-                  aria-label={t('selectOtherBook')}
+                  aria-label={t('moreMenu')}
                   aria-expanded={moreOpen}
                 >
                   ⋯
@@ -355,12 +352,21 @@ export default function BibleDaily() {
                 {moreOpen && (
                   <div className="absolute right-0 top-full mt-1 py-1.5 rounded-xl bg-white border border-[#E6EAF2] shadow-lg z-20 min-w-[180px]">
                     <button
+                      type="button"
                       onClick={() => { setMoreOpen(false); setStartBook('genesis'); setCurrentDay(1); navigate('/settings'); }}
                       className="w-full px-4 py-2.5 text-left text-sm text-[#0B1220] hover:bg-[#f8fafc]"
                     >
                       {t('selectOtherBook')}
                     </button>
                     <button
+                      type="button"
+                      onClick={() => { setMoreOpen(false); navigate('/journal'); }}
+                      className="w-full px-4 py-2.5 text-left text-sm text-[#1B64F2] font-medium hover:bg-[#f8fafc]"
+                    >
+                      {t('journalHeaderTight')}
+                    </button>
+                    <button
+                      type="button"
                       onClick={() => { setMoreOpen(false); navigate('/settings'); }}
                       className="w-full px-4 py-2.5 text-left text-sm text-[#0B1220] hover:bg-[#f8fafc]"
                     >
