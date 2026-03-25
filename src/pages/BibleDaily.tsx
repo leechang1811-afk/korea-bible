@@ -350,7 +350,7 @@ export default function BibleDaily() {
                   ⋯
                 </button>
                 {moreOpen && (
-                  <div className="absolute right-0 top-full mt-1 py-1.5 rounded-xl bg-white border border-[#E6EAF2] shadow-lg z-20 min-w-[180px]">
+                  <div className="absolute right-0 top-full mt-1 py-1.5 rounded-xl bg-white border border-[#E6EAF2] shadow-lg z-20 min-w-[220px]">
                     <button
                       type="button"
                       onClick={() => { setMoreOpen(false); setStartBook('genesis'); setCurrentDay(1); navigate('/settings'); }}
