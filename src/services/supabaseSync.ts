@@ -59,6 +59,7 @@ function fromDbCompletedDay(r: Record<string, unknown>): CompletedDay {
     dayIndex: r.day_index as number,
     date: r.date as string,
     createdAt: new Date(r.created_at as string).getTime(),
+    planKey: ((r.plan_key as string) || 'genesis') as string,
   };
 }
 
@@ -152,16 +153,23 @@ export async function addCompletedDayToSupabase(c: CompletedDay, userId: string)
     user_id: userId,
     day_index: c.dayIndex,
     date: c.date,
+    plan_key: c.planKey ?? 'genesis',
   });
 }
 
-export async function removeCompletedDayFromSupabase(dayIndex: number, date: string, userId: string) {
+export async function removeCompletedDayFromSupabase(
+  dayIndex: number,
+  date: string,
+  userId: string,
+  planKey: string = 'genesis'
+) {
   if (!supabase) return;
   await supabase.from('bible_completed_days')
     .delete()
     .eq('user_id', userId)
     .eq('day_index', dayIndex)
-    .eq('date', date);
+    .eq('date', date)
+    .eq('plan_key', planKey);
 }
 
 export async function saveSettingsToSupabase(userId: string, settings: {
@@ -246,6 +254,7 @@ export async function syncAllToSupabase(
         user_id: userId,
         day_index: c.dayIndex,
         date: c.date,
+        plan_key: c.planKey ?? 'genesis',
       }))
     );
   }

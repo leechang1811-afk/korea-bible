@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import type { ReadingItem } from '../data/bibleSchedule';
+import { getReadingPlanKey, type ReadingItem } from '../data/bibleSchedule';
 import type { BibleVersion } from '../services/bibleText';
 
 export type { BibleVersion };
@@ -41,6 +41,8 @@ export interface CompletedDay {
   dayIndex: number;
   date: string;
   createdAt: number;
+  /** getReadingPlanKey — 전서·순서가 바뀌면 같은 일차도 다른 읽기 단위 */
+  planKey?: string;
 }
 
 const genId = () => crypto.randomUUID?.() ?? `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
@@ -89,21 +91,29 @@ export const useBibleStore = create<{
       completedDays: [],
       setStartBook: (bookId) => set({ startBookId: bookId }),
       toggleDayComplete: (dayIndex, date) => {
-        const { completedDays } = get();
-        const existing = completedDays.find((c) => c.dayIndex === dayIndex);
+        const { completedDays, startBookId, customOrder } = get();
+        const planKey = getReadingPlanKey(startBookId, customOrder);
+        const match = (c: CompletedDay) =>
+          c.dayIndex === dayIndex && (c.planKey ?? 'genesis') === planKey;
+        const existing = completedDays.find(match);
         if (existing) {
-          set({ completedDays: completedDays.filter((c) => c.dayIndex !== dayIndex) });
+          set({ completedDays: completedDays.filter((c) => !match(c)) });
         } else {
           set({
             completedDays: [
               ...completedDays,
-              { dayIndex, date, createdAt: Date.now() },
+              { dayIndex, date, createdAt: Date.now(), planKey },
             ],
           });
         }
       },
-      isDayComplete: (dayIndex) =>
-        get().completedDays.some((c) => c.dayIndex === dayIndex),
+      isDayComplete: (dayIndex) => {
+        const { completedDays, startBookId, customOrder } = get();
+        const planKey = getReadingPlanKey(startBookId, customOrder);
+        return completedDays.some(
+          (c) => c.dayIndex === dayIndex && (c.planKey ?? 'genesis') === planKey
+        );
+      },
       resetReadPlan: () => set({ completedDays: [], currentDayIndex: 1 }),
       setCustomOrder: (order) => set({ customOrder: order }),
       setBibleVersion: (v) => set({ bibleVersion: v }),
@@ -216,6 +226,13 @@ export const useBibleStore = create<{
         const merged = { ...current, ...p };
         if (merged.bibleVersion !== 'ko' && merged.bibleVersion !== 'en') {
           merged.bibleVersion = 'ko';
+        }
+        const raw = merged.completedDays as CompletedDay[] | undefined;
+        if (Array.isArray(raw)) {
+          merged.completedDays = raw.map((c) => ({
+            ...c,
+            planKey: c.planKey ?? 'genesis',
+          }));
         }
         return merged;
       },

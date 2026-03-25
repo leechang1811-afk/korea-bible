@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getScheduleFromBook, getReadingByDayIndex } from '../data/bibleSchedule';
-import { useBibleStore } from '../store/bibleStore';
+import { getScheduleFromBook, getReadingByDayIndex, getReadingPlanKey } from '../data/bibleSchedule';
+import { useBibleStore, type CompletedDay } from '../store/bibleStore';
 import { useTranslation } from '../hooks/useTranslation';
 import { BottomNav } from '../components/BottomNav';
 
@@ -28,17 +28,26 @@ export default function BibleProgress() {
   );
 
   const totalDays = schedule.length;
+  const planKey = useMemo(
+    () => getReadingPlanKey(startBookId, customOrder),
+    [startBookId, customOrder]
+  );
+  /** 현재 전서(읽기 플랜)에 해당하는 완료만 — 일차는 플랜마다 다름 */
+  const completedForPlan = useMemo(
+    () => completedDays.filter((c) => (c.planKey ?? 'genesis') === planKey),
+    [completedDays, planKey]
+  );
   /** dayIndex당 가장 오래전에 체크한 것만 사용 (진도율·캘린더·목록) */
   const completedByOldest = useMemo(() => {
-    const byDay = new Map<number, typeof completedDays[0]>();
-    for (const c of completedDays) {
+    const byDay = new Map<number, CompletedDay>();
+    for (const c of completedForPlan) {
       const existing = byDay.get(c.dayIndex);
       if (!existing || c.date < existing.date || (c.date === existing.date && c.createdAt < existing.createdAt)) {
         byDay.set(c.dayIndex, c);
       }
     }
     return Array.from(byDay.values());
-  }, [completedDays]);
+  }, [completedForPlan]);
 
   const completedDayIndexes = useMemo(
     () => new Set(completedByOldest.map((c) => c.dayIndex)),

@@ -112,6 +112,14 @@ export function getScheduleFromBook(startBookId: string, customOrder?: string[])
   return [...fromStart, ...beforeStart].map((r, i) => ({ ...r, dayIndex: i + 1 }));
 }
 
+/** 1일1독 읽음 확인·진도를 전서(및 커스텀 순서)별로 구분하는 키 */
+export function getReadingPlanKey(startBookId: string, customOrder: string[] | null | undefined): string {
+  if (customOrder && customOrder.length > 0) {
+    return `${startBookId}::${customOrder.join(',')}`;
+  }
+  return startBookId;
+}
+
 export function getReadingByDayIndex(schedule: ReadingItem[], dayIndex: number): ReadingItem | undefined {
   return schedule.find((r) => r.dayIndex === dayIndex);
 }

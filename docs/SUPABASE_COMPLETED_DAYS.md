@@ -13,8 +13,9 @@ CREATE TABLE IF NOT EXISTS bible_completed_days (
   user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
   day_index INTEGER NOT NULL,
   date TEXT NOT NULL,
+  plan_key TEXT NOT NULL DEFAULT 'genesis',
   created_at TIMESTAMPTZ DEFAULT NOW(),
-  UNIQUE(user_id, day_index, date)
+  UNIQUE(user_id, plan_key, day_index)
 );
 
 -- RLS 활성화
@@ -53,7 +54,22 @@ ALTER TABLE bible_user_settings
 - **Table Editor**에서 `bible_completed_days` 테이블이 생성되었는지 확인
 - RLS 정책이 적용되었는지 확인
 
-## 4. 참고
+## 4. 기존 테이블 마이그레이션 (plan_key 추가)
+
+이미 `UNIQUE(user_id, day_index, date)` 만 있는 테이블이면 아래를 한 번 실행하세요.
+
+```sql
+ALTER TABLE bible_completed_days
+  ADD COLUMN IF NOT EXISTS plan_key TEXT NOT NULL DEFAULT 'genesis';
+
+-- 기존 유니크 제약 이름은 대시보드에서 확인 후 삭제 (이름이 다를 수 있음)
+ALTER TABLE bible_completed_days DROP CONSTRAINT IF EXISTS bible_completed_days_user_id_day_index_date_key;
+
+CREATE UNIQUE INDEX IF NOT EXISTS bible_completed_days_user_plan_day_idx
+  ON bible_completed_days(user_id, plan_key, day_index);
+```
+
+## 5. 참고
 
 - `CREATE TABLE IF NOT EXISTS`로 이미 테이블이 있으면 스킵됩니다.
 - 정책이 이미 있으면 `CREATE POLICY`에서 에러가 날 수 있습니다. 그 경우 해당 정책만 수동으로 제거 후 다시 실행하세요.
