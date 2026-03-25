@@ -5,7 +5,6 @@ import { getRandomVerse } from '../services/bibleText';
 import { useBibleStore } from '../store/bibleStore';
 import { useTranslation } from '../hooks/useTranslation';
 import { useToast } from '../context/ToastContext';
-import { BrandNavBarLabel } from '../components/BrandNavBarLabel';
 
 function getTodayDateString() {
   const d = new Date();
@@ -87,7 +86,6 @@ export default function BibleVersePicker() {
           <span className="text-[#0B1220] font-semibold text-sm">{t('todayGodWord')}</span>
           <span className="w-12" />
         </div>
-        <BrandNavBarLabel variant="header" />
       </header>
 
       <div className="flex-1 flex flex-col items-center justify-center px-3 xs:px-4 sm:px-6 py-5 xs:py-6 sm:py-8 overflow-x-hidden w-full box-border">
